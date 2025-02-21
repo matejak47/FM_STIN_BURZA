@@ -14,11 +14,19 @@ public class BurzaController {
 
     private final BurzaService burzaService;
     private final StockService stockService;
+
+
     public BurzaController(BurzaService burzaService, StockService stockService) {
         this.burzaService = burzaService;
         this.stockService = stockService;
     }
 
+    // --------------------------------------------------------------
+    @PostMapping("/filterdown")
+    public List<HistoricalData> filterData(@RequestBody List<HistoricalData> data) {
+        return burzaService.filterDataDown(data);
+    }
+    // --------------------------------------------------------------
     // GET /api/burza/historical?symbol=IBM
     @GetMapping("/historical")
     public List<HistoricalData> getHistoricalData(@RequestParam String symbol) {
@@ -26,18 +34,15 @@ public class BurzaController {
     }
 
     //endpoint pro filtrovaná data!
-    @GetMapping("/historical/filtered")
+    @GetMapping("/historical/filterDown")
     public List<HistoricalData> getFilteredHistoricalData(@RequestParam String symbol) {
         List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
-        return burzaService.filterData(data);
+        return burzaService.filterDataDown(data);
     }
 
     // POST /api/burza/filter
     // v body posílám JSON s listem HistoricalData
-    @PostMapping("/filter")
-    public List<HistoricalData> filterData(@RequestBody List<HistoricalData> data) {
-        return burzaService.filterData(data);
-    }
+
 
     // GET /api/burza/daily?symbol=IBM
     @GetMapping("/daily")
@@ -45,4 +50,19 @@ public class BurzaController {
         List<DailyData> dailyData = stockService.fetchDailyTimeSeries(symbol);
         return dailyData;
     }
+
+    @GetMapping("/daily/date")
+    public List<DailyData> getRecentData(@RequestParam String symbol, @RequestParam String date) {
+        List<DailyData> dailyData = stockService.fetchDailyTimeSeries(symbol);
+        List<DailyData> recentData = stockService.fetchDailyDataByTime(dailyData, date);
+        return recentData;
+    }
+
+    @GetMapping("/historical/filterUp")
+    public List<HistoricalData> getFilteredUpData(@RequestParam String symbol) {
+        List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
+        return burzaService.filterDataUp(data);
+    }
+
+
 }
