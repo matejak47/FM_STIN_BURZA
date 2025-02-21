@@ -45,6 +45,21 @@ public class BurzaService {
         return parseCsvToHistoricalData(csvData);
     }
 
+    public List<HistoricalData> filterDataDown(List<HistoricalData> data) {
+        //Filtruje pouze dny, kdy cena klesla
+        return data.stream()
+                .filter(d -> d.getClosePrice() < d.getOpenPrice())
+                .toList();
+    }
+
+    public List<HistoricalData> filterDataUp(List<HistoricalData> data) {
+        //Filtruje pouze dny, kdy cena klesla
+        return data.stream()
+                .filter(d -> d.getClosePrice() > d.getOpenPrice())
+                .toList();
+    }
+
+
     private List<HistoricalData> parseCsvToHistoricalData(String csvData) {
         List<HistoricalData> historicalDataList = new ArrayList<>();
 
@@ -74,12 +89,4 @@ public class BurzaService {
 
         return historicalDataList;
     }
-
-    public List<HistoricalData> filterData(List<HistoricalData> data) {
-        //Filtruje pouze dny, kdy cena klesla
-        return data.stream()
-                .filter(d -> d.getClosePrice() < d.getOpenPrice())
-                .toList();
-    }
-
 }

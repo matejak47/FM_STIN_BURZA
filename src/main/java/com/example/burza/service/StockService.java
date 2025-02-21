@@ -9,8 +9,13 @@ import org.springframework.web.client.RestTemplate;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.time.LocalDate;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,13 +42,28 @@ public class StockService {
     public List<DailyData> fetchDailyTimeSeries(String symbol) {
         // Sestavení URL pro získání dat
         String url = apiUrl + "?s=" + symbol + ".US&i=" + interval;
-        System.out.println("Calling API: " + url); // Debugging
 
         // Stažení CSV dat
         String csvData = restTemplate.getForObject(url, String.class);
 
         // Převod CSV na JSON obsahující všechna údaje
         return parseCsvToDailyData(csvData);
+    }
+
+    public List<DailyData> fetchDailyDataByTime(List<DailyData> dailyDataList, String startDate) {
+        int dateIndex = 0;
+        for (int i = 0; i <= dailyDataList.size(); i++) {
+            if (dailyDataList.get(i).getDate().equals(startDate)) {
+                dateIndex = i;
+                break;
+            }
+        }
+        System.out.println(dateIndex);
+        List<DailyData> recentDataList = new ArrayList<>();
+        for (int i = 0; i < dateIndex; i++){
+            recentDataList.add(dailyDataList.get(i));
+        }
+        return recentDataList;
     }
 
     /**
@@ -64,17 +84,12 @@ public class StockService {
             return dailyDataList;  // Pokud jsou data prázdná, vracíme prázdný seznam
         }
 
-        // Debug: Zobrazit každý řádek CSV dat
-        for (String line : lines) {
-            System.out.println("Line: " + line);  // Zobrazí každý řádek
-        }
-
         // Iterace přes CSV řádky a převod na objekty DailyData
         for (int i = 1; i < lines.size(); i++) { // Přeskakujeme první řádek (hlavičku)
             String[] values = lines.get(i).split(",");
 
             // Debug: Zobrazit hodnoty pro každý řádek
-            System.out.println("Parsed values: " + String.join(", ", values));
+            //System.out.println("Parsed values: " + String.join(", ", values));
 
             if (values.length >= 6) {
                 try {
