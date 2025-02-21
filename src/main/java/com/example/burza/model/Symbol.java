@@ -1,9 +1,9 @@
 package com.example.burza.model;
+
 import lombok.Data;
 
 @Data
-public class Stock {
+public class Symbol {
     private String symbol;
     private String name;
-    private double currentPrice;
 }
