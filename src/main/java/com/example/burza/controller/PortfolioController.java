@@ -4,9 +4,6 @@ import com.example.burza.service.PortfolioService;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.burza.model.Recommendation;
-import com.example.burza.model.Portfolio;
-import java.util.Map;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/portfolio")

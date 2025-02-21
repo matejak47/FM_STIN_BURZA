@@ -47,15 +47,13 @@ public class BurzaController {
     // GET /api/burza/daily?symbol=IBM
     @GetMapping("/daily")
     public List<DailyData> getDailyData(@RequestParam String symbol) {
-        List<DailyData> dailyData = stockService.fetchDailyTimeSeries(symbol);
-        return dailyData;
+        return stockService.fetchDailyTimeSeries(symbol);
     }
 
     @GetMapping("/daily/date")
     public List<DailyData> getRecentData(@RequestParam String symbol, @RequestParam String date) {
         List<DailyData> dailyData = stockService.fetchDailyTimeSeries(symbol);
-        List<DailyData> recentData = stockService.fetchDailyDataByTime(dailyData, date);
-        return recentData;
+        return stockService.fetchDailyDataByTime(dailyData, date);
     }
 
     @GetMapping("/historical/filterUp")
