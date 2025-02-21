@@ -10,14 +10,13 @@ public class StockService {
     @Value("${burza.api.url}")
     private String apiUrl;
 
-    @Value("${burza.api.key}")
-    private String apiKey;
+
 
     @Autowired
     private RestTemplate restTemplate;
 
     public String fetchDailyTimeSeries(String symbol) {
-        String url = apiUrl + "?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=" + apiKey;
+        String url = apiUrl + "?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=";
         return restTemplate.getForObject(url, String.class);
     }
 

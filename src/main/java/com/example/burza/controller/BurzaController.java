@@ -26,6 +26,13 @@ public class BurzaController {
         return burzaService.fetchHistoricalData(symbol);
     }
 
+    //endpoint pro filtrovaná data!
+    @GetMapping("/historical/filtered")
+    public List<HistoricalData> getFilteredHistoricalData(@RequestParam String symbol) {
+        List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
+        return burzaService.filterData(data);
+    }
+
     // POST /api/burza/filter
     // v body posílám JSON s listem HistoricalData
     @PostMapping("/filter")
@@ -33,6 +40,7 @@ public class BurzaController {
         return burzaService.filterData(data);
     }
 
+    // GET /api/burza/daily?symbol=IBM
     @GetMapping("/daily")
     public String getDailyData(@RequestParam String symbol) {
         return stockService.fetchDailyTimeSeries(symbol);
