@@ -1,11 +1,10 @@
 package com.example.burza.controller;
 
+import com.example.burza.model.DailyData;
 import com.example.burza.model.HistoricalData;
 import com.example.burza.service.BurzaService;
 import com.example.burza.service.StockService;
 import org.springframework.web.bind.annotation.*;
-
-
 
 import java.util.List;
 
@@ -42,7 +41,8 @@ public class BurzaController {
 
     // GET /api/burza/daily?symbol=IBM
     @GetMapping("/daily")
-    public String getDailyData(@RequestParam String symbol) {
-        return stockService.fetchDailyTimeSeries(symbol);
+    public List<DailyData> getDailyData(@RequestParam String symbol) {
+        List<DailyData> dailyData = stockService.fetchDailyTimeSeries(symbol);
+        return dailyData;
     }
 }
