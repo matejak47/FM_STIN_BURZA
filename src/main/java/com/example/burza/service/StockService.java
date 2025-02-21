@@ -1,23 +1,14 @@
 package com.example.burza.service;
 
 import com.example.burza.model.DailyData;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.time.LocalDate;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class StockService {
@@ -35,18 +26,18 @@ public class StockService {
     }
 
     /**
-     * Metoda pro stažení denních dat a jejich převod do JSON formátu.
-     * @param symbol Ticker symbol akcie.
-     * @return JSON seznam obsahující všechna denní data.
+     * Method for downloading daily data and its conversion to JSON format.
+     * @param symbol Ticker symbol stock.
+     * @return  JSON list containing all daily data.
      */
     public List<DailyData> fetchDailyTimeSeries(String symbol) {
-        // Sestavení URL pro získání dat
+        // Assembly of URL for gathering data
         String url = apiUrl + "?s=" + symbol + ".US&i=" + interval;
 
-        // Stažení CSV dat
+        // Download of CSV data
         String csvData = restTemplate.getForObject(url, String.class);
 
-        // Převod CSV na JSON obsahující všechna údaje
+        // Conversion from CSV to JSON containing all details
         return parseCsvToDailyData(csvData);
     }
 
@@ -67,29 +58,25 @@ public class StockService {
     }
 
     /**
-     * Pomocná metoda pro převod CSV dat na JSON.
-     * @param csvData CSV data jako řetězec.
-     * @return JSON reprezentace dat.
+     * Helper method for conversion from CSV to JSON
+     * @param csvData CSV data to string.
+     * @return JSON representation of data.
      */
     private List<DailyData> parseCsvToDailyData(String csvData) {
         List<DailyData> dailyDataList = new ArrayList<>();
 
-        // Čtení CSV řádků (vynechání hlavičky)
+        // Reading of CSV lines
         List<String> lines = new BufferedReader(new StringReader(csvData))
                 .lines()
-                .collect(Collectors.toList());
+                .toList();
 
         if (lines.size() < 2) {
             System.out.println("ERROR: CSV neobsahuje žádná data!");
-            return dailyDataList;  // Pokud jsou data prázdná, vracíme prázdný seznam
+            return dailyDataList;
         }
 
-        // Iterace přes CSV řádky a převod na objekty DailyData
-        for (int i = 1; i < lines.size(); i++) { // Přeskakujeme první řádek (hlavičku)
+        for (int i = 1; i < lines.size(); i++) {
             String[] values = lines.get(i).split(",");
-
-            // Debug: Zobrazit hodnoty pro každý řádek
-            //System.out.println("Parsed values: " + String.join(", ", values));
 
             if (values.length >= 6) {
                 try {
@@ -98,7 +85,7 @@ public class StockService {
                     double high = Double.parseDouble(values[2]);
                     double low = Double.parseDouble(values[3]);
                     double close = Double.parseDouble(values[4]);
-                    long volume = (long) Double.parseDouble(values[5]);  // Volume může mít desetinné hodnoty, takže je lepší ho převést na long
+                    long volume = (long) Double.parseDouble(values[5]);
 
                     dailyDataList.add(new DailyData(date, open, high, low, close, volume));
                 } catch (NumberFormatException e) {
@@ -108,12 +95,9 @@ public class StockService {
             }
         }
 
-        // Seřazení podle data od nejnovějšího po nejstarší
+        // Sorting based on the date from newest to oldest
         dailyDataList.sort(Comparator.comparing(DailyData::getDate).reversed());
 
-        return dailyDataList; // Vracíme seznam DailyData
+        return dailyDataList;
     }
-
-
-
 }
