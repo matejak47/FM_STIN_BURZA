@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Service class for handling stock-related operations.
+ * Provides functionality for fetching and analyzing stock market data.
+ */
 @Service
 public class StockService {
 
@@ -24,6 +28,10 @@ public class StockService {
 
     private final RestTemplate restTemplate;
 
+    /**
+     * Constructs StockService with required RestTemplate.
+     * @param restTemplate Template for making HTTP requests
+     */
     public StockService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -40,20 +48,22 @@ public class StockService {
         // Download of CSV data
         String csvData = restTemplate.getForObject(url, String.class);
 
-
         // Conversion from CSV to JSON containing all details
         return parseCsvToDailyData(csvData);
     }
 
-    // Funkce pro získání všech symbolů, které měly pokles za poslední X dní
+    /**
+     * Retrieves all stock symbols that have shown a price decline over the specified number of days.
+     * @param days Number of days to check for price decline
+     * @return List of symbols that have declined in price
+     * @throws IOException If there's an error loading symbols
+     */
     public List<Symbol> getSymbolsWithDecline(int days) throws IOException {
         List<Symbol> decliningSymbols = new ArrayList<>();
 
-        // Načteme symboly
         LoadSymbols loadSymbols = new LoadSymbols();
         List<Symbol> symbols = loadSymbols.LoadSymbols();
 
-        // Pro každý symbol získáme historická data a zjistíme, zda došlo k poklesu
         for (Symbol symbol : symbols) {
             List<DailyData> data = fetchDailyTimeSeries(symbol.getSymbol());
 
@@ -65,7 +75,12 @@ public class StockService {
         return decliningSymbols;
     }
 
-
+    /**
+     * Fetches daily data up to a specific start date.
+     * @param dailyDataList Complete list of daily data
+     * @param startDate Date to start fetching data from
+     * @return List of daily data points up to the specified date
+     */
     public List<DailyData> fetchDailyDataByTime(List<DailyData> dailyDataList, String startDate) {
         int dateIndex = 0;
         for (int i = 0; i <= dailyDataList.size(); i++) {
@@ -126,16 +141,20 @@ public class StockService {
         return dailyDataList;
     }
 
-    // Funkce pro kontrolu, zda došlo k poklesu za posledních X dní
+    /**
+     * Checks if there has been a price decline over the specified number of days.
+     * @param data List of daily data to analyze
+     * @param days Number of days to check for decline
+     * @return True if there has been a price decline, false otherwise
+     */
     private boolean hasDeclineInLastNDays(List<DailyData> data, int days) {
         if (data == null || data.size() < days) {
             return false;
         }
 
-        // Zkontrolujeme první den a poslední den v období
-        DailyData firstDay = data.get(data.size() - days); // První den z posledních N dnů
-        DailyData lastDay = data.get(data.size() - 1);  // Poslední den
+        DailyData firstDay = data.get(data.size() - days);
+        DailyData lastDay = data.get(data.size() - 1);
 
-        return lastDay.getClose() < firstDay.getClose(); // Pokud cena uzavření klesla
+        return lastDay.getClose() < firstDay.getClose();
     }
 }
