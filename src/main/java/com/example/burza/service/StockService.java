@@ -1,10 +1,13 @@
 package com.example.burza.service;
 
 import com.example.burza.model.DailyData;
+import com.example.burza.model.LoadSymbols;
+import com.example.burza.model.Symbol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,9 +40,31 @@ public class StockService {
         // Download of CSV data
         String csvData = restTemplate.getForObject(url, String.class);
 
+
         // Conversion from CSV to JSON containing all details
         return parseCsvToDailyData(csvData);
     }
+
+    // Funkce pro získání všech symbolů, které měly pokles za poslední X dní
+    public List<Symbol> getSymbolsWithDecline(int days) throws IOException {
+        List<Symbol> decliningSymbols = new ArrayList<>();
+
+        // Načteme symboly
+        LoadSymbols loadSymbols = new LoadSymbols();
+        List<Symbol> symbols = loadSymbols.LoadSymbols();
+
+        // Pro každý symbol získáme historická data a zjistíme, zda došlo k poklesu
+        for (Symbol symbol : symbols) {
+            List<DailyData> data = fetchDailyTimeSeries(symbol.getSymbol());
+
+            if (hasDeclineInLastNDays(data, days)) {
+                decliningSymbols.add(symbol);
+            }
+        }
+
+        return decliningSymbols;
+    }
+
 
     public List<DailyData> fetchDailyDataByTime(List<DailyData> dailyDataList, String startDate) {
         int dateIndex = 0;
@@ -99,5 +124,18 @@ public class StockService {
         dailyDataList.sort(Comparator.comparing(DailyData::getDate).reversed());
 
         return dailyDataList;
+    }
+
+    // Funkce pro kontrolu, zda došlo k poklesu za posledních X dní
+    private boolean hasDeclineInLastNDays(List<DailyData> data, int days) {
+        if (data == null || data.size() < days) {
+            return false;
+        }
+
+        // Zkontrolujeme první den a poslední den v období
+        DailyData firstDay = data.get(data.size() - days); // První den z posledních N dnů
+        DailyData lastDay = data.get(data.size() - 1);  // Poslední den
+
+        return lastDay.getClose() < firstDay.getClose(); // Pokud cena uzavření klesla
     }
 }
