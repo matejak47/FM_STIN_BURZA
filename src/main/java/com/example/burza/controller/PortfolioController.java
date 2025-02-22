@@ -15,11 +15,4 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    @PostMapping("/execute")
-    public void executeRecommendation(
-            @RequestParam String userId,
-            @RequestBody Recommendation recommendation
-    ) {
-        portfolioService.executeRecommendation(userId, recommendation);
-    }
 }
