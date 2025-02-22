@@ -18,12 +18,11 @@ import java.util.Map;
 public class Portfolio {
     private Map<String, Integer> holdings;
     private double balance;
+    private FavoriteStocks favoriteStocks;
 
-    /**
-     * Default constructor initializing an empty portfolio with a starting balance.
-     */
     public Portfolio() {
         this.holdings = new HashMap<>();
         this.balance = 10000.0;
+        this.favoriteStocks = new FavoriteStocks();
     }
 }
