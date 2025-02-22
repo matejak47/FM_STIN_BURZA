@@ -56,22 +56,17 @@ public class StockService {
      * Retrieves all stock symbols that have shown a price decline over the specified number of days.
      * @param days Number of days to check for price decline
      * @return List of symbols that have declined in price
-     * @throws IOException If there's an error loading symbols
      */
-    public List<Symbol> getSymbolsWithDecline(int days) throws IOException {
-        List<Symbol> decliningSymbols = new ArrayList<>();
+    public List<String> getSymbolsWithDecline(List<String> symbols,int days){
+        List<String> decliningSymbols = new ArrayList<>();
 
-        LoadSymbols loadSymbols = new LoadSymbols();
-        List<Symbol> symbols = loadSymbols.LoadSymbols();
+        for (String symbol : symbols) {
+            List<DailyData> dailyData = fetchDailyTimeSeries(symbol);
 
-        for (Symbol symbol : symbols) {
-            List<DailyData> data = fetchDailyTimeSeries(symbol.getSymbol());
-
-            if (hasDeclineInLastNDays(data, days)) {
+            if (dailyData != null && !dailyData.isEmpty() && hasDeclineInLastNDays(dailyData, days)) {
                 decliningSymbols.add(symbol);
             }
         }
-
         return decliningSymbols;
     }
 
@@ -148,12 +143,14 @@ public class StockService {
      * @return True if there has been a price decline, false otherwise
      */
     private boolean hasDeclineInLastNDays(List<DailyData> data, int days) {
-        if (data == null || data.size() < days) {
+        if (data == null || data.isEmpty() || data.size() < days) {
             return false;
         }
 
-        DailyData firstDay = data.get(data.size() - days);
-        DailyData lastDay = data.get(data.size() - 1);
+        data.sort(Comparator.comparing(DailyData::getDate).reversed());
+
+        DailyData firstDay = data.get(0);
+        DailyData lastDay = data.get(days - 1);
 
         return lastDay.getClose() < firstDay.getClose();
     }

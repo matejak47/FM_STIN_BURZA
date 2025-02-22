@@ -2,6 +2,8 @@ package com.example.burza.controller;
 
 import com.example.burza.model.Portfolio;
 import com.example.burza.service.PortfolioService;
+import com.example.burza.service.StockService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -9,9 +11,11 @@ import java.util.List;
 @RequestMapping("/api/portfolio")
 public class PortfolioController {
     private final PortfolioService portfolioService;
+    private final StockService stockService;
 
-    public PortfolioController(PortfolioService portfolioService) {
+    public PortfolioController(PortfolioService portfolioService, StockService stockService) {
         this.portfolioService = portfolioService;
+        this.stockService = stockService;
     }
 
     /**
@@ -21,6 +25,13 @@ public class PortfolioController {
     @GetMapping("/favorites")
     public List<String> getFavoriteStocks() {
         return portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
+    }
+
+    @GetMapping("/favorites/filter")
+    public List<String> getFavoriteStocksDecline(@RequestParam int days) {
+        List<String> symbols =  portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
+        return stockService.getSymbolsWithDecline(symbols,days);
+
     }
 
     /**
