@@ -1,13 +1,10 @@
 package com.example.burza.service;
 
 import com.example.burza.model.DailyData;
-import com.example.burza.model.LoadSymbols;
-import com.example.burza.model.Symbol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -55,17 +52,14 @@ public class StockService {
     /**
      * Retrieves all stock symbols that have shown a price decline over the specified number of days.
      * @param days Number of days to check for price decline
+     * @param symbols Favourite symbols of the user
      * @return List of symbols that have declined in price
-     * @throws IOException If there's an error loading symbols
      */
-    public List<Symbol> getSymbolsWithDecline(int days) throws IOException {
-        List<Symbol> decliningSymbols = new ArrayList<>();
+    public List<String> getSymbolsWithDecline(List<String> symbols,int days){
+        List<String> decliningSymbols = new ArrayList<>();
 
-        LoadSymbols loadSymbols = new LoadSymbols();
-        List<Symbol> symbols = loadSymbols.LoadSymbols();
-
-        for (Symbol symbol : symbols) {
-            List<DailyData> data = fetchDailyTimeSeries(symbol.getSymbol());
+        for (String symbol : symbols) {
+            List<DailyData> data = fetchDailyTimeSeries(symbol);
 
             if (hasDeclineInLastNDays(data, days)) {
                 decliningSymbols.add(symbol);
@@ -73,6 +67,26 @@ public class StockService {
         }
 
         return decliningSymbols;
+    }
+
+    /**
+     * Retrieves all stock symbols that have shown a price increase over the specified number of days.
+     * @param days Number of days to check for price increase
+     * @param symbols Favourite symbols of the user
+     * @return List of symbols that have increased in price
+     */
+    public List<String> getSymbolsWithIncrease(List<String> symbols,int days){
+        List<String> increasingSymbols = new ArrayList<>();
+
+        for (String symbol : symbols) {
+            List<DailyData> data = fetchDailyTimeSeries(symbol);
+
+            if (hasIncreasedInLastNDays(data, days)) {
+                increasingSymbols.add(symbol);
+            }
+        }
+
+        return increasingSymbols;
     }
 
     /**
@@ -111,7 +125,7 @@ public class StockService {
                 .toList();
 
         if (lines.size() < 2) {
-            System.out.println("ERROR: CSV neobsahuje žádná data!");
+            System.out.println("ERROR: CSV does not contain any data!");
             return dailyDataList;
         }
 
@@ -152,8 +166,18 @@ public class StockService {
             return false;
         }
 
-        DailyData firstDay = data.get(data.size() - days);
-        DailyData lastDay = data.get(data.size() - 1);
+        DailyData firstDay = data.get(0);
+        DailyData lastDay = data.get(days - 1);
+
+        return lastDay.getClose() > firstDay.getClose();
+    }
+    private boolean hasIncreasedInLastNDays(List<DailyData> data, int days) {
+        if (data == null || data.size() < days) {
+            return false;
+        }
+
+        DailyData firstDay = data.get(0);
+        DailyData lastDay = data.get(days - 1);
 
         return lastDay.getClose() < firstDay.getClose();
     }

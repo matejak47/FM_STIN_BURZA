@@ -88,18 +88,6 @@ public class BurzaController {
         return stockService.fetchDailyDataByTime(dailyData, date);
     }
 
-    // GET /api/burza/symbols-with-decline?days=5
-    /**
-     * Finds symbols that have shown a price decline over the specified number of days.
-     * @param days Number of days to check for price decline
-     * @return List of symbols showing price decline
-     * @throws IOException If there's an error loading symbols
-     */
-    @GetMapping("/symbols-with-decline")
-    public List<Symbol> getSymbolsWithDecline(@RequestParam int days) throws IOException {
-        return stockService.getSymbolsWithDecline(days);
-    }
-
     /**
      * Retrieves and filters historical data showing upward price movements.
      * @param symbol Stock symbol to retrieve and filter data for
