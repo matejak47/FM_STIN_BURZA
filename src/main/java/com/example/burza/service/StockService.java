@@ -1,13 +1,10 @@
 package com.example.burza.service;
 
 import com.example.burza.model.DailyData;
-import com.example.burza.model.LoadSymbols;
-import com.example.burza.model.Symbol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -61,12 +58,13 @@ public class StockService {
         List<String> decliningSymbols = new ArrayList<>();
 
         for (String symbol : symbols) {
-            List<DailyData> dailyData = fetchDailyTimeSeries(symbol);
+            List<DailyData> data = fetchDailyTimeSeries(symbol);
 
-            if (dailyData != null && !dailyData.isEmpty() && hasDeclineInLastNDays(dailyData, days)) {
+            if (hasDeclineInLastNDays(data, days)) {
                 decliningSymbols.add(symbol);
             }
         }
+
         return decliningSymbols;
     }
 
@@ -106,7 +104,7 @@ public class StockService {
                 .toList();
 
         if (lines.size() < 2) {
-            System.out.println("ERROR: CSV neobsahuje žádná data!");
+            System.out.println("ERROR: CSV does not contain any data!");
             return dailyDataList;
         }
 
@@ -143,15 +141,15 @@ public class StockService {
      * @return True if there has been a price decline, false otherwise
      */
     private boolean hasDeclineInLastNDays(List<DailyData> data, int days) {
-        if (data == null || data.isEmpty() || data.size() < days) {
+        if (data == null || data.size() < days) {
             return false;
         }
-
-        data.sort(Comparator.comparing(DailyData::getDate).reversed());
 
         DailyData firstDay = data.get(0);
         DailyData lastDay = data.get(days - 1);
 
-        return lastDay.getClose() < firstDay.getClose();
+        boolean decline = lastDay.getClose() > firstDay.getClose();
+
+        return decline;
     }
 }
