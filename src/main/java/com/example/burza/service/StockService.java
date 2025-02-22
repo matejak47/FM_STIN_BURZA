@@ -142,9 +142,8 @@ public class StockService {
                     long volume = (long) Double.parseDouble(values[5]);
 
                     dailyDataList.add(new DailyData(date, open, high, low, close, volume));
-                } catch (NumberFormatException e) {
-                    System.out.println("Error parsing values: " + String.join(", ", values));
-                    e.printStackTrace();
+                } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                    System.err.println("Warning: Skipping invalid CSV line. Values: " + String.join(", ", values));
                 }
             }
         }
