@@ -52,6 +52,7 @@ public class StockService {
     /**
      * Retrieves all stock symbols that have shown a price decline over the specified number of days.
      * @param days Number of days to check for price decline
+     * @param symbols Favourite symbols of the user
      * @return List of symbols that have declined in price
      */
     public List<String> getSymbolsWithDecline(List<String> symbols,int days){
@@ -66,6 +67,26 @@ public class StockService {
         }
 
         return decliningSymbols;
+    }
+
+    /**
+     * Retrieves all stock symbols that have shown a price increase over the specified number of days.
+     * @param days Number of days to check for price increase
+     * @param symbols Favourite symbols of the user
+     * @return List of symbols that have increased in price
+     */
+    public List<String> getSymbolsWithIncrease(List<String> symbols,int days){
+        List<String> increasingSymbols = new ArrayList<>();
+
+        for (String symbol : symbols) {
+            List<DailyData> data = fetchDailyTimeSeries(symbol);
+
+            if (hasIncreasedInLastNDays(data, days)) {
+                increasingSymbols.add(symbol);
+            }
+        }
+
+        return increasingSymbols;
     }
 
     /**
@@ -148,8 +169,16 @@ public class StockService {
         DailyData firstDay = data.get(0);
         DailyData lastDay = data.get(days - 1);
 
-        boolean decline = lastDay.getClose() > firstDay.getClose();
+        return lastDay.getClose() > firstDay.getClose();
+    }
+    private boolean hasIncreasedInLastNDays(List<DailyData> data, int days) {
+        if (data == null || data.size() < days) {
+            return false;
+        }
 
-        return decline;
+        DailyData firstDay = data.get(0);
+        DailyData lastDay = data.get(days - 1);
+
+        return lastDay.getClose() < firstDay.getClose();
     }
 }
