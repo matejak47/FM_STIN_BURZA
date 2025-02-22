@@ -3,10 +3,13 @@ package com.example.burza.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * Data model representing historical stock market data.
+ */
 @Data
-@AllArgsConstructor // Automaticky vytvoří konstruktor se všemi parametry
+@AllArgsConstructor
 public class HistoricalData {
-    private String date; // Původně LocalDate, ale JSON používá String
+    private String date;
     private double openPrice;
     private double closePrice;
 }
