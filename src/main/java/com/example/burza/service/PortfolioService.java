@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Service handling portfolio operations.
+ * Manages user portfolios and executes trading recommendations.
+ */
 @Service
 public class PortfolioService {
     // Import java.util.Map, com.example.burza.model.Portfolio, ...

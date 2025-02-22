@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Service handling stock exchange operations.
+ * Provides functionality for fetching and filtering stock market data.
+ */
 @Service
 public class BurzaService {
     @Value("${burza.api.url}")
@@ -20,10 +24,19 @@ public class BurzaService {
 
     private final RestTemplate restTemplate;
 
+    /**
+     * Constructs BurzaService with required RestTemplate.
+     * @param restTemplate Template for making HTTP requests
+     */
     public BurzaService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * Fetches historical data for a specific stock symbol.
+     * @param symbol Stock symbol to fetch data for
+     * @return List of historical data points
+     */
     public List<HistoricalData> fetchHistoricalData(String symbol) {
         String url = apiUrl + "?s=" + symbol + ".US&i=" + interval;
         System.out.println("Calling API: " + url); // Debugging
@@ -38,6 +51,11 @@ public class BurzaService {
         return parseCsvToHistoricalData(csvData);
     }
 
+    /**
+     * Filters data to show only downward price movements.
+     * @param data List of historical data to filter
+     * @return Filtered list showing only price decreases
+     */
     public List<HistoricalData> filterDataDown(List<HistoricalData> data) {
 
         return data.stream()
@@ -45,16 +63,20 @@ public class BurzaService {
                 .toList();
     }
 
+    /**
+     * Filters data to show only upward price movements.
+     * @param data List of historical data to filter
+     * @return Filtered list showing only price increases
+     */
+
     public List<HistoricalData> filterDataUp(List<HistoricalData> data) {
         return data.stream()
                 .filter(d -> d.getClosePrice() > d.getOpenPrice())
                 .toList();
     }
 
-
     private List<HistoricalData> parseCsvToHistoricalData(String csvData) {
         List<HistoricalData> historicalDataList = new ArrayList<>();
-
 
         List<String> lines = new BufferedReader(new StringReader(csvData))
                 .lines()
