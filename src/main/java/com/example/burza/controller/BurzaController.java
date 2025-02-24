@@ -3,6 +3,7 @@ package com.example.burza.controller;
 import com.example.burza.model.*;
 import com.example.burza.service.BurzaService;
 import com.example.burza.service.StockService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -106,7 +107,16 @@ public class BurzaController {
      */
     @GetMapping("/all")
     public List<Symbol> getAllSymbols() throws IOException {
-        return loadSymbols.LoadSymbols();
+        try {
+            return loadSymbols.LoadSymbols();
+        } catch (IOException e) {
+            throw new RuntimeException("Error loading symbols", e);
+        }
+    }
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleRuntimeException(RuntimeException ex) {
+        return "Error loading symbols";
     }
 
 

@@ -75,4 +75,29 @@ class PortfolioControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
     }
+    @Test
+    void testGetFavoriteStocksDecline() throws Exception {
+        when(portfolioService.getPortfolio()).thenReturn(portfolio);
+        when(portfolio.getFavoriteStocks()).thenReturn(favoriteStocks);
+        when(favoriteStocks.getSymbols()).thenReturn(List.of("AAPL", "TSLA"));
+        when(stockService.getSymbolsWithDecline(List.of("AAPL", "TSLA"), 5)).thenReturn(List.of("AAPL"));
+
+        mockMvc.perform(get("/api/portfolio/favorites/decline?days=5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0]").value("AAPL"));
+    }
+
+    @Test
+    void testGetFavoriteStocksIncrease() throws Exception {
+        when(portfolioService.getPortfolio()).thenReturn(portfolio);
+        when(portfolio.getFavoriteStocks()).thenReturn(favoriteStocks);
+        when(favoriteStocks.getSymbols()).thenReturn(List.of("AAPL", "TSLA"));
+        when(stockService.getSymbolsWithIncrease(List.of("AAPL", "TSLA"), 5)).thenReturn(List.of("TSLA"));
+
+        mockMvc.perform(get("/api/portfolio/favorites/increase?days=5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0]").value("TSLA"));
+    }
 }
