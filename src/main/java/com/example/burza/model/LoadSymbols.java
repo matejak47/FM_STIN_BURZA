@@ -15,20 +15,23 @@ import java.util.List;
 @Data
 @Service
 public class LoadSymbols {
-    private final String path = "data/symbols.json";
+    private final ObjectMapper objectMapper;
+    private final ClassPathResource resource;
 
-        /**
-        * Loads stock symbols from a JSON file.
-        * @return List of stock symbols
-        * @throws IOException If there's an error reading the JSON file
-        */
-        public List<Symbol> LoadSymbols () throws IOException {
-            ClassPathResource resource = new ClassPathResource(path);
-            ObjectMapper objectMapper = new ObjectMapper();
+    public LoadSymbols(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.resource = new ClassPathResource("data/symbols.json");
+    }
 
-            try (InputStream inputStream = resource.getInputStream()) {
-                Symbols symbols = objectMapper.readValue(inputStream, Symbols.class);
-                return symbols.getSymbols();
-            }
+    /**
+     * Loads stock symbols from a JSON file.
+     * @return List of stock symbols
+     * @throws IOException If there's an error reading the JSON file
+     */
+    public List<Symbol> LoadSymbols() throws IOException {
+        try (InputStream inputStream = resource.getInputStream()) {
+            Symbols symbols = objectMapper.readValue(inputStream, Symbols.class);
+            return symbols.getSymbols();
         }
     }
+}
