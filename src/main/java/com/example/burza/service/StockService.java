@@ -39,15 +39,33 @@ public class StockService {
      * @return  JSON list containing all daily data.
      */
     public List<DailyData> fetchDailyTimeSeries(String symbol) {
-        // Assembly of URL for gathering data
         String url = apiUrl + "?s=" + symbol + ".US&i=" + interval;
 
-        // Download of CSV data
+        // Pokusíme se načíst odpověď jako String
         String csvData = restTemplate.getForObject(url, String.class);
 
-        // Conversion from CSV to JSON containing all details
+        // Pokud odpověď není validní string, pokusíme se ji načíst jako List<String>
+        if (csvData == null || csvData.isEmpty()) {
+            List<?> listResponse = restTemplate.getForObject(url, List.class);
+            if (listResponse != null && !listResponse.isEmpty()) {
+                // Ověříme, zda obsahuje řetězce
+                if (listResponse.get(0) instanceof String) {
+                    csvData = String.join("\n", (List<String>) listResponse);
+                } else {
+                    System.out.println("ERROR: Očekávaný formát je List<String>, ale API vrátilo: " + listResponse.get(0).getClass().getSimpleName());
+                    return List.of(); // Vrátíme prázdný seznam místo chybného formátu
+                }
+            }
+        }
+
+        if (csvData == null || csvData.isEmpty()) {
+            System.out.println("ERROR: API nevrátila žádná data!");
+            return List.of();
+        }
+
         return parseCsvToDailyData(csvData);
     }
+
 
     /**
      * Retrieves all stock symbols that have shown a price decline over the specified number of days.
