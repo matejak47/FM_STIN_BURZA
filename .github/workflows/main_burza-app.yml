@@ -37,8 +37,8 @@ jobs:
 
       - name: Move frontend build to backend static folder
         run: |
-          mkdir -p src/main/resources/static
-          cp -r frontend/dist/* src/main/resources/static/
+          if not exist "src/main/resources/static" mkdir src/main/resources/static
+          xcopy /E /I frontend/dist src/main/resources/static
 
       # 2️⃣ Build BACKEND (Spring Boot)
       - name: Set up Java version
