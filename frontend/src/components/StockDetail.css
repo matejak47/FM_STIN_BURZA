@@ -42,7 +42,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
+
 }
 
 /* Řádek pod grafem pro open, high, low */
@@ -85,7 +85,7 @@
 
 .currency {
     font-size: 1.2rem; /* menší písmo pro USD */
-    opacity: 0.8;      /* lehce zeslabená barva */
+    opacity: 0.8; /* lehce zeslabená barva */
 }
 
 /* 2) Řádek se změnou (arrow, change-value) a textem "dnes" */
@@ -123,3 +123,46 @@
 .extra-info p {
     margin: 0.3rem 0;
 }
+
+.stock-detail {
+    position: relative; /* pro absolutní pozicování hvězdičky uvnitř */
+}
+
+.favourite-button {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: gold;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.stock-detail {
+    position: relative;
+}
+
+.favourite-button {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    color: #7b7777;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    align-items: center;
+}
+
+.favourite-button .favourite-text {
+    /* Text zůstává stejného vzhledu, případně upravte dle potřeby */
+}
+
+.favourite-star {
+    margin-left: 0.5rem; /* mezera mezi textem a hvězdičkou */
+    color: yellow; /* hvězdička bude žlutá */
+}
+
+
+
