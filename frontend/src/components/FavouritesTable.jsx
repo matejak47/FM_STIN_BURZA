@@ -1,4 +1,4 @@
-function FavouritesTable({ favourites }) {
+function FavouritesTable({favourites, onToggleFavourite}) {
     return (
         <div className="favourites-table">
             {favourites.length === 0 ? (
@@ -6,7 +6,16 @@ function FavouritesTable({ favourites }) {
             ) : (
                 <ul>
                     {favourites.map((symbol) => (
-                        <li key={symbol}>{symbol}</li>
+                        <li key={symbol} className="favourite-item">
+                            <span className="favourite-symbol">{symbol}</span>
+                            <button
+                                className="remove-favourite-button"
+                                onClick={() => onToggleFavourite(symbol)}
+                                title="Odstranit z oblíbených"
+                            >
+                                –
+                            </button>
+                        </li>
                     ))}
                 </ul>
             )}
