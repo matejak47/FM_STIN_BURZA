@@ -1,44 +1,62 @@
-import React, {useEffect, useState} from 'react'
-import {fetchStockData} from './utils/fetchStockData'
-import StockDetail from './components/StockDetail'
-import SearchBar from './components/SearchBar'
-import FavouritesTable from './components/FavouritesTable'
+import React, {useEffect, useState} from 'react';
+import {fetchStockData} from './utils/fetchStockData';
+import StockDetail from './components/StockDetail';
+import SearchBar from './components/SearchBar';
+import FavouritesTable from './components/FavouritesTable';
 
 function App() {
-    const [selectedSymbol, setSelectedSymbol] = useState('')
-    const [selectedName, setSelectedName] = useState('')
-    const [dailyData, setDailyData] = useState(null)
-    const [selectedStockData, setSelectedStockData] = useState(null)
+    const [selectedSymbol, setSelectedSymbol] = useState('');
+    const [selectedName, setSelectedName] = useState('');
+    const [dailyData, setDailyData] = useState(null);
+    const [selectedStockData, setSelectedStockData] = useState(null);
 
-    // Načteme favourites z localStorage při startu
+    // Načtení balance z localStorage
+    const [balance, setBalance] = useState(() => {
+        return parseFloat(localStorage.getItem('balance')) || 50000.0;
+    });
+
+    // Načtení favourites z localStorage
     const [favourites, setFavourites] = useState(() => {
-        const savedFavourites = localStorage.getItem('favourites')
-        return savedFavourites ? JSON.parse(savedFavourites) : []
-    })
+        const savedFavourites = localStorage.getItem('favourites');
+        return savedFavourites ? JSON.parse(savedFavourites) : [];
+    });
 
-    // Kdykoliv se favourites změní, uložíme je do localStorage
+    // Načtení portfolia z localStorage
+    const [portfolio, setPortfolio] = useState(() => {
+        const savedPortfolio = localStorage.getItem('portfolio');
+        return savedPortfolio ? JSON.parse(savedPortfolio) : {};
+    });
+
+    // Automatické ukládání do localStorage při změně dat
     useEffect(() => {
-        localStorage.setItem('favourites', JSON.stringify(favourites))
-    }, [favourites])
+        localStorage.setItem('favourites', JSON.stringify(favourites));
+    }, [favourites]);
 
-    // Úprava handleShowStock, aby přijímala symbol a company name jako parametry
+    useEffect(() => {
+        localStorage.setItem('balance', balance.toString());
+    }, [balance]);
+
+    useEffect(() => {
+        localStorage.setItem('portfolio', JSON.stringify(portfolio));
+    }, [portfolio]);
+
     const handleShowStock = async (symbolParam, nameParam) => {
-        const sym = symbolParam || selectedSymbol
-        const compName = nameParam || selectedName
-        if (!sym) return
+        const sym = symbolParam || selectedSymbol;
+        const compName = nameParam || selectedName;
+        if (!sym) return;
 
         try {
-            const allData = await fetchStockData(sym)
+            const allData = await fetchStockData(sym);
             if (!allData || allData.length === 0) {
-                setSelectedStockData(null)
-                setDailyData(null)
-                return
+                setSelectedStockData(null);
+                setDailyData(null);
+                return;
             }
 
-            allData.sort((a, b) => new Date(a.date) - new Date(b.date))
-            setDailyData(allData)
+            allData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            setDailyData(allData);
 
-            const lastEntry = allData[allData.length - 1]
+            const lastEntry = allData[allData.length - 1];
             const detail = {
                 symbol: sym,
                 companyName: compName,
@@ -48,41 +66,79 @@ function App() {
                 low: lastEntry.low,
                 date: lastEntry.date,
                 volume: lastEntry.volume
-            }
-            setSelectedStockData(detail)
+            };
+            setSelectedStockData(detail);
         } catch (error) {
-            console.error(error)
-            alert('Nepodařilo se načíst data pro zvolený symbol.')
+            console.error(error);
+            alert('Failed to load stock data.');
         }
-    }
+    };
 
     const handleSelectSymbol = (symbol, name) => {
-        setSelectedSymbol(symbol)
-        setSelectedName(name)
-    }
-
-    // Úprava handleSelectFavourite, která předá parametry přímo do handleShowStock
-    const handleSelectFavourite = (symbol, name) => {
-        setSelectedSymbol(symbol)
-        setSelectedName(name)
-        handleShowStock(symbol, name)
-    }
+        setSelectedSymbol(symbol);
+        setSelectedName(name);
+    };
 
     const handleToggleFavourite = (symbol, name) => {
         setFavourites(prev => {
-            const exists = prev.some(fav => fav.symbol === symbol)
-            if (exists) {
-                return prev.filter(fav => fav.symbol !== symbol)
+            const existingStock = prev.find(fav => fav.symbol === symbol);
+            const isAlreadyFavourite = existingStock !== undefined;
+
+            if (isAlreadyFavourite) {
+                localStorage.setItem(`fav_${symbol}`, JSON.stringify(existingStock));
+                return prev.filter(fav => fav.symbol !== symbol);
             } else {
+                // Načtení dat z portfolia, pokud už byla akcie koupena
+                const previousData = portfolio[symbol] || {quantity: 0, totalValue: 0};
+
                 if (prev.length < 5) {
-                    return [...prev, {symbol, name, quantity: 0, totalValue: 0}]
+                    return [...prev, {
+                        symbol,
+                        name,
+                        quantity: previousData.quantity,
+                        totalValue: previousData.totalValue
+                    }];
                 } else {
-                    alert('Maximální počet oblíbených akcií je 5!')
-                    return prev
+                    alert('Maximum 5 favourites allowed!');
+                    return prev;
                 }
             }
-        })
-    }
+        });
+    };
+
+    const handleBuyStock = (symbol, name, quantity, price) => {
+        const totalCost = quantity * price;
+        if (totalCost > balance) {
+            alert('Not enough funds!');
+            return;
+        }
+
+        setBalance(prevBalance => prevBalance - totalCost);
+
+        // Aktualizace portfolia
+        setPortfolio(prev => {
+            const existingStock = prev[symbol] || {quantity: 0, totalValue: 0};
+            const updatedStock = {
+                quantity: existingStock.quantity + quantity,
+                totalValue: (existingStock.quantity + quantity) * price
+            };
+            return {...prev, [symbol]: updatedStock};
+        });
+
+        // Aktualizace favourites
+        setFavourites(prev => {
+            return prev.map(fav => {
+                if (fav.symbol === symbol) {
+                    return {
+                        ...fav,
+                        quantity: fav.quantity + quantity,
+                        totalValue: (fav.quantity + quantity) * price
+                    };
+                }
+                return fav;
+            });
+        });
+    };
 
     return (
         <div className="app-wrapper">
@@ -91,9 +147,14 @@ function App() {
                     <img src="/logoMRM.png" alt="Logo" className="logo"/>
                 </div>
                 <div className="search-area">
+                    <div className="balance-container">
+                        <span className="balance-text">Balance: ${balance.toFixed(2)}</span>
+                    </div>
                     <SearchBar onSelectSymbol={handleSelectSymbol} onShowStock={() => handleShowStock()}/>
+
                 </div>
             </header>
+
             <main className="main-content">
                 {selectedStockData && dailyData ? (
                     <StockDetail
@@ -101,24 +162,27 @@ function App() {
                         dailyData={dailyData}
                         favourites={favourites}
                         onToggleFavourite={handleToggleFavourite}
+                        onBuyStock={handleBuyStock}
+                        balance={balance}
                     />
                 ) : (
                     <p style={{marginTop: '2rem'}}>
-                        Vyberte symbol a klikněte na "Search" pro zobrazení detailu akcie.
+                        Select a stock symbol and click "Search" to view details.
                     </p>
                 )}
             </main>
+
             <aside className="favourites-section">
                 <h2>Favourites</h2>
                 <FavouritesTable
                     favourites={favourites}
                     onToggleFavourite={handleToggleFavourite}
-                    onSelectFavourite={handleSelectFavourite}
+                    onSelectFavourite={handleShowStock}
                 />
             </aside>
             <footer className="footer">
                 <p style={{margin: 0}}>
-                    &copy; Copyright 2025 - {new Date().getFullYear()}
+                    &copy;2025 - {new Date().getFullYear()} - MRM Burza
                 </p>
                 <a
                     href="https://github.com/matejak47/FM_STIN_BURZA"
@@ -139,7 +203,7 @@ function App() {
                 </a>
             </footer>
         </div>
-    )
+    );
 }
 
-export default App
+export default App;

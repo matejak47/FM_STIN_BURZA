@@ -294,3 +294,28 @@ body {
     padding: 0;
 }
 
+/* Upravíme hlavní header, aby správně zarovnal prvky */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid #444;
+}
+
+/* Zarovnání vyhledávací sekce */
+.search-area {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Mezera mezi search a balance */
+}
+
+/* Kontejner pro balance */
+.balance-container {
+    font-size: 1rem;
+    color: white;
+    font-weight: bold;
+    padding-right: 2rem;
+}
+
