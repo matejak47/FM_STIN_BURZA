@@ -30,7 +30,7 @@ class BurzaControllerTest {
     private StockService stockService;
 
     @Mock
-    private LoadSymbols loadSymbols;
+    private SymbolLoading symbolLoading;
 
     @InjectMocks
     private BurzaController burzaController;
@@ -125,7 +125,7 @@ class BurzaControllerTest {
 
     @Test
     void testGetAllSymbols() throws Exception {
-        when(loadSymbols.LoadSymbols()).thenReturn(symbols);
+        when(symbolLoading.LoadSymbols()).thenReturn(symbols);
 
         mockMvc.perform(get("/api/burza/all"))
                 .andExpect(status().isOk())
@@ -135,7 +135,7 @@ class BurzaControllerTest {
 
     @Test
     void testGetAllSymbols_Exception() throws Exception {
-        doThrow(new IOException("File not found")).when(loadSymbols).LoadSymbols();
+        doThrow(new IOException("File not found")).when(symbolLoading).LoadSymbols();
 
         mockMvc.perform(get("/api/burza/all"))
                 .andExpect(status().isInternalServerError());

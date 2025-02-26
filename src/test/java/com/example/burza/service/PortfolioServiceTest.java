@@ -1,6 +1,8 @@
 package com.example.burza.service;
 
-import com.example.burza.model.*;
+import com.example.burza.model.DailyData;
+import com.example.burza.model.TradeOrder;
+import com.example.burza.model.TradeResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -12,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 class PortfolioServiceTest {
 
@@ -39,7 +41,7 @@ class PortfolioServiceTest {
         TradeResult result = portfolioService.executeTrade(order);
 
         assertTrue(result.isSuccess());
-        assertEquals("Nákup úspěšně proveden", result.getMessage());
+        assertEquals("Purchase successful", result.getMessage());
         assertEquals(105, result.getExecutedPrice());
         assertEquals(210, result.getTotalCost());
         assertEquals(790, result.getRemainingBalance());
@@ -56,7 +58,7 @@ class PortfolioServiceTest {
         TradeResult result = portfolioService.executeTrade(order);
 
         assertFalse(result.isSuccess());
-        assertEquals("Nedostatek prostředků pro nákup", result.getMessage());
+        assertEquals("Not enough resources for this purchase", result.getMessage());
         assertEquals(105, result.getExecutedPrice());
         assertEquals(1050, result.getTotalCost());
         assertEquals(1000, result.getRemainingBalance());
@@ -75,7 +77,7 @@ class PortfolioServiceTest {
         TradeResult result = portfolioService.executeTrade(order);
 
         assertTrue(result.isSuccess());
-        assertEquals("Prodej úspěšně proveden", result.getMessage());
+        assertEquals("Purchase successful", result.getMessage());
         assertEquals(305, result.getExecutedPrice());
         assertEquals(1525, result.getTotalCost());
         assertEquals(2525, result.getRemainingBalance());
@@ -94,7 +96,7 @@ class PortfolioServiceTest {
         TradeResult result = portfolioService.executeTrade(order);
 
         assertFalse(result.isSuccess());
-        assertEquals("Nedostatečné množství akcií k prodeji", result.getMessage());
+        assertEquals("Not enough stocks for the purchase", result.getMessage());
         assertEquals(305, result.getExecutedPrice());
         assertEquals(0, result.getTotalCost());
         assertEquals(1000, result.getRemainingBalance());
@@ -110,7 +112,7 @@ class PortfolioServiceTest {
         TradeResult result = portfolioService.executeTrade(order);
 
         assertFalse(result.isSuccess());
-        assertEquals("Nelze získat aktuální cenu akcie", result.getMessage());
+        assertEquals("Impossible to get the current value of the stock", result.getMessage());
         assertEquals(0, result.getExecutedPrice());
         assertEquals(0, result.getTotalCost());
         assertEquals(1000, result.getRemainingBalance());
@@ -126,7 +128,7 @@ class PortfolioServiceTest {
         TradeResult result = portfolioService.executeTrade(order);
 
         assertFalse(result.isSuccess());
-        assertEquals("Nedostatečné množství akcií k prodeji", result.getMessage());
+        assertEquals("Not enough stocks for the purchase", result.getMessage());
         assertEquals(705, result.getExecutedPrice());
         assertEquals(0, result.getTotalCost());
         assertEquals(1000, result.getRemainingBalance());

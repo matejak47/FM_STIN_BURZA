@@ -19,18 +19,18 @@ public class BurzaController {
 
     private final BurzaService burzaService;
     private final StockService stockService;
-    private final LoadSymbols loadSymbols;
+    private final SymbolLoading symbolLoading;
 
     /**
      * Constructs BurzaController with required services.
      * @param burzaService Service for handling stock exchange operations
      * @param stockService Service for handling stock-specific operations
-     * @param loadSymbols Service for loading stock symbols
+     * @param symbolLoading Service for loading stock symbols
      */
-    public BurzaController(BurzaService burzaService, StockService stockService, LoadSymbols loadSymbols) {
+    public BurzaController(BurzaService burzaService, StockService stockService, SymbolLoading symbolLoading) {
         this.burzaService = burzaService;
         this.stockService = stockService;
-        this.loadSymbols = loadSymbols;
+        this.symbolLoading = symbolLoading;
     }
 
     // --------------------------------------------------------------
@@ -103,19 +103,18 @@ public class BurzaController {
     /**
      * Retrieves all available stock symbols.
      * @return List of all available stock symbols
-     * @throws IOException If there's an error loading symbols
      */
     @GetMapping("/all")
-    public List<Symbol> getAllSymbols() throws IOException {
+    public List<Symbol> getAllSymbols() {
         try {
-            return loadSymbols.LoadSymbols();
+            return symbolLoading.LoadSymbols();
         } catch (IOException e) {
             throw new RuntimeException("Error loading symbols", e);
         }
     }
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleRuntimeException(RuntimeException ex) {
+    public String handleRuntimeException() {
         return "Error loading symbols";
     }
 

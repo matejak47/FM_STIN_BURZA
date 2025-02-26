@@ -83,7 +83,7 @@ public class BurzaService {
                 .toList();
 
         if (lines.size() < 2) {
-            System.out.println("ERROR: CSV neobsahuje žádná data!");
+            System.out.println("ERROR: CSV does not contain any data!");
             return historicalDataList;
         }
 
