@@ -122,6 +122,9 @@ function App() {
                     />
                 </div>
                 <div className="nav-bar">
+                    <div className="balance-container">
+                        <span className="balance-text">Balance: ${balance.toFixed(2)}</span>
+                    </div>
                     <button className="nav-button" onClick={() => setView(view === 'home' ? 'portfolio' : 'home')}>
                         {view === 'home' ? 'Portfolio' : 'Back'}
                     </button>
