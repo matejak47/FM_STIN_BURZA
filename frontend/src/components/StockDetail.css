@@ -1,0 +1,36 @@
+.stock-detail {
+    margin-top: 2rem;
+}
+
+.stock-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2c2c2c;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #444;
+}
+
+.chart-wrapper {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.info-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+    background-color: #2c2c2c;
+    border: 1px solid #444;
+    padding: 1rem;
+}
+
+.info-left,
+.info-right {
+    flex: 1;
+}
+
+.info-left p,
+.info-right p {
+    margin: 0.5rem 0;
+}

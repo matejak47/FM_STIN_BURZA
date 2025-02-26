@@ -1,46 +1,36 @@
-function StockDetail({ stockData, favourites, onToggleFavourite }) {
-    if (!stockData) return null
+import React from 'react'
+import StockChart from './StockChart'
+import './StockDetail.css'
 
-    const { symbol, companyName, open, close, high, low, date } = stockData
+function StockDetail({ stockData, dailyData }) {
+    if (!stockData || !dailyData || dailyData.length === 0) return null
 
+    const { companyName, open, close, high, low, date, volume } = stockData
     const percentChange = ((close - open) / open) * 100
     const changeColor = percentChange >= 0 ? 'green' : 'red'
-
-    const isFavourite = favourites.includes(symbol)
 
     return (
         <div className="stock-detail">
             <div className="stock-header">
                 <h2 className="company-name">{companyName}</h2>
-                <span
-                    className="favourite-star"
-                    style={{ color: isFavourite ? 'gold' : 'gray', cursor: 'pointer' }}
-                    onClick={() => onToggleFavourite(symbol)}
-                >
-          ★
-        </span>
             </div>
 
-            {/* Placeholder graf – orámovaný barvou changeColor */}
-            <div className="stock-graph" style={{ border: `2px solid ${changeColor}` }}>
-                <p style={{ textAlign: 'center', marginTop: '80px', color: '#ccc' }}>
-                    Graph placeholder
-                </p>
+            <div className="chart-wrapper">
+                <StockChart dailyData={dailyData} />
             </div>
 
-            <div className="stock-values">
-                <p>HIGH: {high}</p>
-                <p>OPEN: {open}</p>
-                <p>LOW: {low}</p>
-                <p>CLOSE: {close}</p>
-                <p>
-                    CHANGE:{' '}
-                    <span style={{ color: changeColor }}>
-            {percentChange.toFixed(2)}%
-          </span>
-                </p>
-                {/* Datum z daily data */}
-                <p>DATE: {date}</p>
+            <div className="info-container">
+                <div className="info-left">
+                    <p><strong>HIGH:</strong> {high}</p>
+                    <p><strong>OPEN:</strong> {open}</p>
+                    <p><strong>LOW:</strong> {low}</p>
+                </div>
+                <div className="info-right">
+                    <p><strong>CLOSE:</strong> {close}</p>
+                    <p style={{ color: changeColor }}><strong>CHANGE:</strong> {percentChange.toFixed(2)}%</p>
+                    <p><strong>DATE:</strong> {date}</p>
+                    <p><strong>VOLUME:</strong> {volume}</p>
+                </div>
             </div>
         </div>
     )
