@@ -30,28 +30,29 @@ jobs:
           cd frontend
           npm install
 
+      # 1️⃣ Build FRONTEND (Vite + React)
       - name: Build frontend
         run: |
           cd frontend
           npm run build
-          echo "Checking if build directory exists..."
-          if (!(Test-Path "build")) {
-            Write-Host "❌ Build directory was not created!"
+          echo "Checking if dist directory exists..."
+          if (!(Test-Path "dist")) {
+            Write-Host "❌ Dist directory was not created!"
             exit 1
           }
         shell: pwsh
-
+      
       - name: Move frontend build to backend static folder
         shell: pwsh
         run: |
-          if (!(Test-Path "frontend/build")) {
-            Write-Host "❌ frontend/build does not exist! Build failed."
+          if (!(Test-Path "frontend/dist")) {
+            Write-Host "❌ frontend/dist does not exist! Build failed."
             exit 1
           }
           if (!(Test-Path "src/main/resources/static")) {
             New-Item -ItemType Directory -Path "src/main/resources/static"
           }
-          Copy-Item -Path frontend/build/* -Destination src/main/resources/static -Recurse -Force
+          Copy-Item -Path frontend/dist/* -Destination src/main/resources/static -Recurse -Force
 
       # 2️⃣ Build BACKEND (Spring Boot)
       - name: Set up Java version
