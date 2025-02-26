@@ -109,12 +109,12 @@ body {
 
 /* Stock detail */
 .stock-detail {
-  max-width: 600px;
+  max-width: 1500px;
   margin: 0 auto;
   background-color: #2c2c2c;
   border: 1px solid #444;
   padding: 1rem;
-  text-align: left;
+  text-align: center;
 }
 
 .stock-header {
