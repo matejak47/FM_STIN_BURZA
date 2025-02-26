@@ -319,3 +319,24 @@ body {
     padding-right: 2rem;
 }
 
+.nav-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Mezera mezi tlačítkem a SearchBarem */
+}
+
+.nav-button {
+    padding: 0.5rem 1rem;
+    background-color: #444;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.nav-button:hover {
+    background-color: #666;
+}
+
+
+
