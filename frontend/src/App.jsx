@@ -11,6 +11,7 @@ function App() {
     const [selectedStockData, setSelectedStockData] = useState(null)
     const [favourites, setFavourites] = useState([])
 
+
     const handleSelectSymbol = (symbol, name) => {
         setSelectedSymbol(symbol)
         setSelectedName(name)
@@ -40,7 +41,9 @@ function App() {
                 close: lastEntry.close,
                 high: lastEntry.high,
                 low: lastEntry.low,
-                date: lastEntry.date
+                date: lastEntry.date,
+                volume: lastEntry.volume
+
             }
             setSelectedStockData(detail)
         } catch (error) {
