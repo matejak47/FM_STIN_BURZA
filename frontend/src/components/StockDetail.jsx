@@ -23,8 +23,8 @@ function StockDetail({ stockData, dailyData }) {
         maximumFractionDigits: 2
     })
     const formattedDifference = differenceValue.toLocaleString('cs-CZ', {
-        minimumFractionDigits: 3,
-        maximumFractionDigits: 3
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
     })
     const formattedPercentChange = percentChange.toLocaleString('cs-CZ', {
         minimumFractionDigits: 2,
