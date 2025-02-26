@@ -1,7 +1,12 @@
 .stock-detail {
-    margin-top: 2rem;
+    margin: 1rem; /* např. 1rem okraje, ať to není nalepené na kraji */
+    background-color: #2c2c2c;
+    border: 1px solid #444;
+    padding: 1rem;
+    text-align: left;
 }
 
+/* Hlavička */
 .stock-header {
     display: flex;
     justify-content: space-between;
@@ -11,26 +16,106 @@
     border-bottom: 1px solid #444;
 }
 
+/* Flex kontejner pro levou a pravou část */
+.stock-body {
+    display: flex;
+    margin-top: 1rem;
+    width: 100%; /* aby se mohlo roztáhnout přes celou šířku rodiče (např. #root) */
+}
+
+/* Levá sekce (graf + řádek pro open/high/low) */
+.chart-section {
+    flex: 4; /* zabere větší část šířky */
+    display: flex;
+    flex-direction: column;
+    margin-right: 2rem; /* mezera mezi grafem a infem */
+    padding-right: 3rem;
+}
+
+/* Prostor pro graf samotný - nastavíme větší výšku,
+   ale hlavně šířku 100%, aby se roztáhl horizontálně. */
 .chart-wrapper {
     width: 100%;
-    margin-top: 1rem;
+    height: 600px; /* zvol si, jak vysoký graf chceš */
+    background-color: #1e1e1e; /* volitelně */
+    padding: 3rem;
+    padding-left: 2rem;
 }
 
-.info-container {
+/* Řádek pod grafem pro open, high, low */
+.chart-info-row {
     display: flex;
-    justify-content: space-between;
-    margin-top: 1rem;
+    justify-content: space-around;
+    margin-top: 0.5rem;
     background-color: #2c2c2c;
+    padding: 0.5rem;
     border: 1px solid #444;
+}
+
+/* PRAVÁ ČÁST (info-container)
+   Zde provádíme největší úpravy, aby vypadal podobně
+   jako na tvém obrázku (velká cena, menší měna, šipka, atd.). */
+.info-container {
+    flex: 1; /* zabere zbytek šířky */
+    background-color: #2c2c2c;
     padding: 1rem;
+    border: 1px solid #444;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
-.info-left,
-.info-right {
-    flex: 1;
+/* 1) Velké číslo (hlavní cena) + měna vedle sebe */
+.price-line {
+    display: flex;
+    align-items: baseline; /* zarovnání spodní linie */
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
-.info-left p,
-.info-right p {
-    margin: 0.5rem 0;
+.main-price {
+    font-size: 2.5rem; /* větší písmo pro hlavní cenu */
+    font-weight: bold;
+}
+
+.currency {
+    font-size: 1.2rem; /* menší písmo pro USD */
+    opacity: 0.8;      /* lehce zeslabená barva */
+}
+
+/* 2) Řádek se změnou (arrow, change-value) a textem "dnes" */
+.change-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Šipka (▲/▼) */
+.arrow {
+    font-size: 1.5rem;
+    /* Barva (green/red) se řeší v inline stylu nebo v className */
+}
+
+/* Hodnota změny (např. "-0,060 (0,024 %)") */
+.change-value {
+    font-size: 1.2rem;
+}
+
+/* Text "dnes" nebo cokoliv vedle */
+.time-label {
+    font-size: 1rem;
+    color: #ccc;
+}
+
+/* 3) Doplňující info (datum, volume, disclaimery apod.) */
+.extra-info {
+    margin-top: 1rem;
+    font-size: 0.9rem; /* menší písmo */
+    color: #aaa;
+}
+
+.extra-info p {
+    margin: 0.3rem 0;
 }

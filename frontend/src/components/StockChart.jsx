@@ -10,7 +10,7 @@ import {
 } from 'recharts'
 import moment from 'moment'
 
-function StockChart({ dailyData }) {
+function StockChart({ dailyData, lineColor }) {
     return (
         <div style={{ width: '100%', height: 500 }}>
             <ResponsiveContainer>
@@ -26,7 +26,13 @@ function StockChart({ dailyData }) {
                         labelFormatter={(label) => `Date: ${moment(label).format('LL')}`}
                         formatter={(value, name) => [value.toFixed(2), name.toUpperCase()]}
                     />
-                    <Line type="monotone" dataKey="close" stroke="#82ca9d" strokeWidth={2} dot={false} />
+                    <Line
+                        type="monotone"
+                        dataKey="close"
+                        stroke={lineColor || "#82ca9d"}
+                        strokeWidth={2}
+                        dot={false}
+                    />
                 </LineChart>
             </ResponsiveContainer>
         </div>
