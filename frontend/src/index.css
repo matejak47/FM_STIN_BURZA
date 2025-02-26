@@ -201,8 +201,11 @@ body {
     border: 1px solid #444;
     padding: 1rem;
     box-sizing: border-box;
-    height: 600px; /* stejná výška jako graf */
-    overflow-y: auto;
+    /* NEBUDE zde height ani overflow */
+}
+
+.favourites-section h2 {
+    padding-bottom: 1rem;
 }
 
 .favourites-table {
