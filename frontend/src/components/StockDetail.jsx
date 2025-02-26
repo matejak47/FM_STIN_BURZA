@@ -1,32 +1,43 @@
-import React from 'react'
-import StockChart from './StockChart'
-import './StockDetail.css'
+import React, {useState} from 'react';
+import StockChart from './StockChart';
+import './StockDetail.css';
 
-function StockDetail({stockData, dailyData, favourites, onToggleFavourite}) {
-    if (!stockData || !dailyData || dailyData.length === 0) return null
+function StockDetail({stockData, dailyData, favourites, onToggleFavourite, onBuyStock}) {
+    if (!stockData || !dailyData || dailyData.length === 0) return null;
 
-    const {symbol, companyName, open, close, high, low, date, volume} = stockData
+    const {symbol, companyName, open, close, high, low, date, volume} = stockData;
+    const [quantity, setQuantity] = useState('');
 
-    const differenceValue = close - open
-    const percentChange = (differenceValue / open) * 100
-    const arrowSymbol = differenceValue >= 0 ? '▲' : '▼'
-    const changeColor = differenceValue >= 0 ? 'green' : 'red'
+    // Výpočet rozdílu a procentní změny
+    const differenceValue = close - open;
+    const percentChange = ((differenceValue / open) * 100).toFixed(2);
+    const arrowSymbol = differenceValue >= 0 ? '▲' : '▼';
+    const changeColor = differenceValue >= 0 ? 'green' : 'red';
 
     const formattedClose = close.toLocaleString('cs-CZ', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-    })
+    });
     const formattedDifference = differenceValue.toLocaleString('cs-CZ', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-    })
+    });
     const formattedPercentChange = percentChange.toLocaleString('cs-CZ', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
-    })
+    });
 
-    // Zjistíme, zda je akcie mezi oblíbenými
-    const isFavourite = favourites.some(f => f.symbol === symbol)
+    const handleBuy = () => {
+        const qty = parseInt(quantity, 10);
+        if (!isNaN(qty) && qty > 0) {
+            onBuyStock(symbol, companyName, qty, close);
+            setQuantity('');
+        } else {
+            alert('Zadejte platné množství.');
+        }
+    };
+
+    const isFavourite = favourites.some(f => f.symbol === symbol);
 
     return (
         <div className="stock-detail">
@@ -46,7 +57,6 @@ function StockDetail({stockData, dailyData, favourites, onToggleFavourite}) {
                 </button>
             </div>
 
-
             <div className="stock-body">
                 <div className="chart-section">
                     <div className="chart-wrapper">
@@ -58,6 +68,7 @@ function StockDetail({stockData, dailyData, favourites, onToggleFavourite}) {
                         <p>LOW: {low}</p>
                     </div>
                 </div>
+
                 <div className="info-container">
                     <div className="price-line">
                         <span className="main-price">{formattedClose}</span>
@@ -70,16 +81,30 @@ function StockDetail({stockData, dailyData, favourites, onToggleFavourite}) {
                         <span className="change-value" style={{color: changeColor}}>
                             {formattedDifference} ({formattedPercentChange}%)
                         </span>
-                        <span className="time-label">dnes</span>
+                        <span className="time-label">Today</span>
                     </div>
                     <div className="extra-info">
-                        <p>Zavřeno: {date}</p>
+                        <p>Closed Date: {date}</p>
                         <p>Volume: {volume}</p>
+                    </div>
+
+                    {/* Sekce pro nákup akcií */}
+                    <div className="buy-section">
+                        <input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            placeholder="Stock amount"
+                            min="1"
+                        />
+                        <button className="buy-button" onClick={handleBuy}>
+                            Buy
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
-export default StockDetail
+export default StockDetail;
