@@ -51,8 +51,7 @@ public class PortfolioService {
         } else {
             result = executeSell(order, currentPrice);
         }
-
-        // ✅ Uložit aktualizovaný stav portfolia
+        
         savePortfolioState();
         return result;
     }

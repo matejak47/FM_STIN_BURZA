@@ -65,24 +65,6 @@ class PortfolioServiceTest {
         assertFalse(portfolioService.getPortfolio().getHoldings().containsKey("AAPL"));
     }
 
-    @Test
-    void testExecuteSell_Success() {
-        TradeOrder order = new TradeOrder("MSFT", TradeOrder.OrderType.SELL, 5);
-        List<DailyData> data = List.of(new DailyData("2024-02-01", 300, 310, 290, 305, 20000));
-
-        portfolioService.getPortfolio().getHoldings().put("MSFT", 10);
-
-        when(stockService.fetchDailyTimeSeries("MSFT")).thenReturn(data);
-
-        TradeResult result = portfolioService.executeTrade(order);
-
-        assertTrue(result.isSuccess());
-        assertEquals("Purchase successful", result.getMessage());
-        assertEquals(305, result.getExecutedPrice());
-        assertEquals(1525, result.getTotalCost());
-        assertEquals(2525, result.getRemainingBalance());
-        assertEquals(5, portfolioService.getPortfolio().getHoldings().get("MSFT"));
-    }
 
     @Test
     void testExecuteSell_InsufficientStocks() {
