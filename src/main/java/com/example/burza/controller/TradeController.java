@@ -1,6 +1,8 @@
 package com.example.burza.controller;
 
-import com.example.burza.model.*;
+import com.example.burza.model.Portfolio;
+import com.example.burza.model.TradeOrder;
+import com.example.burza.model.TradeResult;
 import com.example.burza.service.PortfolioService;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,7 @@ public class TradeController {
 
     /**
      * Constructor to initialize PortfolioService.
+     *
      * @param portfolioService the service handling portfolio operations
      */
     public TradeController(PortfolioService portfolioService) {
@@ -23,6 +26,7 @@ public class TradeController {
 
     /**
      * Executes a trade order.
+     *
      * @param order the trade order containing symbol, type, and quantity
      * @return the result of the trade execution
      */
@@ -33,6 +37,7 @@ public class TradeController {
 
     /**
      * Retrieves the current portfolio.
+     *
      * @return the user's portfolio with holdings and balance
      */
     @GetMapping("/portfolio")

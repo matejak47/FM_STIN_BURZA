@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import {useEffect, useState} from 'react'
 
-function SearchBar({ onSelectSymbol, onShowStock }) {
+function SearchBar({onSelectSymbol, onShowStock}) {
     const [inputValue, setInputValue] = useState('')
     const [allSymbols, setAllSymbols] = useState([]) // pole objektů { symbol, name }
     const [filteredSymbols, setFilteredSymbols] = useState([])
@@ -57,6 +57,7 @@ function SearchBar({ onSelectSymbol, onShowStock }) {
 
             {filteredSymbols.length > 0 && (
                 <ul className="autocomplete-list">
+
                     {filteredSymbols.map((item) => (
                         <li
                             key={item.symbol}

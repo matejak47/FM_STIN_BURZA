@@ -25,6 +25,7 @@ public class SymbolLoading {
 
     /**
      * Loads stock symbols from a JSON file.
+     *
      * @return List of stock symbols
      * @throws IOException If there's an error reading the JSON file
      */

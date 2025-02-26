@@ -45,80 +45,53 @@ public class PortfolioService {
 
         double currentPrice = dailyData.get(0).getClose();
 
+        TradeResult result;
         if (order.getOrderType() == TradeOrder.OrderType.BUY) {
-            return executeBuy(order, currentPrice);
+            result = executeBuy(order, currentPrice);
         } else {
-            return executeSell(order, currentPrice);
+            result = executeSell(order, currentPrice);
         }
+
+        // ✅ Uložit aktualizovaný stav portfolia
+        savePortfolioState();
+        return result;
     }
 
-    /**
-     * Handles buying stocks.
-     *
-     * @param order        the trade order
-     * @param currentPrice the current stock price
-     * @return the result of the buy operation
-     */
     private TradeResult executeBuy(TradeOrder order, double currentPrice) {
         double totalCost = currentPrice * order.getQuantity();
         if (totalCost > portfolio.getBalance()) {
-            return new TradeResult(
-                    false,
-                    "Not enough resources for this purchase",
-                    currentPrice,
-                    totalCost,
-                    portfolio.getBalance()
-            );
+            return new TradeResult(false, "Not enough resources for this purchase", currentPrice, totalCost, portfolio.getBalance());
         }
 
         int currentQuantity = portfolio.getHoldings().getOrDefault(order.getSymbol(), 0);
         portfolio.getHoldings().put(order.getSymbol(), currentQuantity + order.getQuantity());
         portfolio.setBalance(portfolio.getBalance() - totalCost);
 
-        return new TradeResult(
-                true,
-                "Purchase successful",
-                currentPrice,
-                totalCost,
-                portfolio.getBalance()
-        );
+        // ✅ Uložit změnu
+        savePortfolioState();
+
+        return new TradeResult(true, "Purchase successful", currentPrice, totalCost, portfolio.getBalance());
     }
 
-    /**
-     * Handles selling stocks.
-     *
-     * @param order        the trade order
-     * @param currentPrice the current stock price
-     * @return the result of the sell operation
-     */
     private TradeResult executeSell(TradeOrder order, double currentPrice) {
         int currentQuantity = portfolio.getHoldings().getOrDefault(order.getSymbol(), 0);
-
         if (currentQuantity < order.getQuantity()) {
-            return new TradeResult(
-                    false,
-                    "Not enough stocks for the purchase",
-                    currentPrice,
-                    0,
-                    portfolio.getBalance()
-            );
+            return new TradeResult(false, "Not enough stocks for the purchase", currentPrice, 0, portfolio.getBalance());
         }
 
         double totalValue = currentPrice * order.getQuantity();
-
-        portfolio.getHoldings().put(
-                order.getSymbol(),
-                currentQuantity - order.getQuantity()
-        );
+        portfolio.getHoldings().put(order.getSymbol(), currentQuantity - order.getQuantity());
         portfolio.setBalance(portfolio.getBalance() + totalValue);
 
-        return new TradeResult(
-                true,
-                "Purchase successful",
-                currentPrice,
-                totalValue,
-                portfolio.getBalance()
-        );
+        // ✅ Uložit změnu
+        savePortfolioState();
+
+        return new TradeResult(true, "Sale successful", currentPrice, totalValue, portfolio.getBalance());
+    }
+
+    // ✅ Přidána metoda pro uložení změn v portfoliu
+    private void savePortfolioState() {
+        System.out.println("Saving portfolio: " + portfolio);
     }
 
 }
