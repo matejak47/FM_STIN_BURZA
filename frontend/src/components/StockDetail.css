@@ -28,7 +28,6 @@
     flex: 4; /* zabere větší část šířky */
     display: flex;
     flex-direction: column;
-    margin-right: 2rem; /* mezera mezi grafem a infem */
     padding-right: 3rem;
 }
 
@@ -40,6 +39,10 @@
     background-color: #1e1e1e; /* volitelně */
     padding: 3rem;
     padding-left: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 /* Řádek pod grafem pro open, high, low */
@@ -64,6 +67,7 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    margin-left: 3rem;
 }
 
 /* 1) Velké číslo (hlavní cena) + měna vedle sebe */
