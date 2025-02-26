@@ -4,6 +4,7 @@ import com.example.burza.model.DailyData;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class StockService {
 
     /**
      * Constructs StockService with required RestTemplate.
+     *
      * @param restTemplate Template for making HTTP requests
      */
     public StockService(RestTemplate restTemplate) {
@@ -35,25 +37,23 @@ public class StockService {
 
     /**
      * Method for downloading daily data and its conversion to JSON format.
+     *
      * @param symbol Ticker symbol stock.
-     * @return  JSON list containing all daily data.
+     * @return JSON list containing all daily data.
      */
     public List<DailyData> fetchDailyTimeSeries(String symbol) {
         String url = apiUrl + "?s=" + symbol + ".US&i=" + interval;
 
-        // Pokusíme se načíst odpověď jako String
         String csvData = restTemplate.getForObject(url, String.class);
 
-        // Pokud odpověď není validní string, pokusíme se ji načíst jako List<String>
         if (csvData == null || csvData.isEmpty()) {
             List<?> listResponse = restTemplate.getForObject(url, List.class);
             if (listResponse != null && !listResponse.isEmpty()) {
-                // Ověříme, zda obsahuje řetězce
                 if (listResponse.get(0) instanceof String) {
                     csvData = String.join("\n", (List<String>) listResponse);
                 } else {
                     System.out.println("ERROR: Očekávaný formát je List<String>, ale API vrátilo: " + listResponse.get(0).getClass().getSimpleName());
-                    return List.of(); // Vrátíme prázdný seznam místo chybného formátu
+                    return List.of();
                 }
             }
         }
@@ -69,11 +69,12 @@ public class StockService {
 
     /**
      * Retrieves all stock symbols that have shown a price decline over the specified number of days.
-     * @param days Number of days to check for price decline
+     *
+     * @param days    Number of days to check for price decline
      * @param symbols Favourite symbols of the user
      * @return List of symbols that have declined in price
      */
-    public List<String> getSymbolsWithDecline(List<String> symbols,int days){
+    public List<String> getSymbolsWithDecline(List<String> symbols, int days) {
         List<String> decliningSymbols = new ArrayList<>();
 
         for (String symbol : symbols) {
@@ -89,11 +90,12 @@ public class StockService {
 
     /**
      * Retrieves all stock symbols that have shown a price increase over the specified number of days.
-     * @param days Number of days to check for price increase
+     *
+     * @param days    Number of days to check for price increase
      * @param symbols Favourite symbols of the user
      * @return List of symbols that have increased in price
      */
-    public List<String> getSymbolsWithIncrease(List<String> symbols,int days){
+    public List<String> getSymbolsWithIncrease(List<String> symbols, int days) {
         List<String> increasingSymbols = new ArrayList<>();
 
         for (String symbol : symbols) {
@@ -109,8 +111,9 @@ public class StockService {
 
     /**
      * Fetches daily data up to a specific start date.
+     *
      * @param dailyDataList Complete list of daily data
-     * @param startDate Date to start fetching data from
+     * @param startDate     Date to start fetching data from
      * @return List of daily data points up to the specified date
      */
     public List<DailyData> fetchDailyDataByTime(List<DailyData> dailyDataList, String startDate) {
@@ -123,7 +126,7 @@ public class StockService {
         }
         System.out.println(dateIndex);
         List<DailyData> recentDataList = new ArrayList<>();
-        for (int i = 0; i < dateIndex; i++){
+        for (int i = 0; i < dateIndex; i++) {
             recentDataList.add(dailyDataList.get(i));
         }
         return recentDataList;
@@ -131,6 +134,7 @@ public class StockService {
 
     /**
      * Helper method for conversion from CSV to JSON
+     *
      * @param csvData CSV data to string.
      * @return JSON representation of data.
      */
@@ -174,6 +178,7 @@ public class StockService {
 
     /**
      * Checks if there has been a price decline over the specified number of days.
+     *
      * @param data List of daily data to analyze
      * @param days Number of days to check for decline
      * @return True if there has been a price decline, false otherwise
@@ -188,6 +193,7 @@ public class StockService {
 
         return lastDay.getClose() > firstDay.getClose();
     }
+
     private boolean hasIncreasedInLastNDays(List<DailyData> data, int days) {
         if (data == null || data.size() < days) {
             return false;

@@ -61,10 +61,11 @@ class BurzaServiceTest {
 
     @Test
     void testFetchHistoricalData_Success() {
-        String csvData = "Date,Open,High,Low,Close,Volume\n" +
-                "2024-02-03,150,155,145,153,10000\n" +
-                "2024-02-02,145,152,144,147,12000\n" +
-                "2024-02-01,140,148,139,145,11000";
+        String csvData = """
+                Date,Open,High,Low,Close,Volume
+                2024-02-03,150,155,145,153,10000
+                2024-02-02,145,152,144,147,12000
+                2024-02-01,140,148,139,145,11000""";
 
         when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(csvData);
 
@@ -113,9 +114,10 @@ class BurzaServiceTest {
 
     @Test
     void testFetchHistoricalData_MalformedCsvData() {
-        String csvData = "Date,Open,High,Low,Close,Volume\n" +
-                "2024-02-03,150,155,145\n" +
-                "2024-02-02,145,152,144,147,12000";
+        String csvData = """
+                Date,Open,High,Low,Close,Volume
+                2024-02-03,150,155,145
+                2024-02-02,145,152,144,147,12000""";
 
         when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(csvData);
 
@@ -127,14 +129,13 @@ class BurzaServiceTest {
 
     @Test
     void testFetchHistoricalData_InvalidNumberFormat() {
-        String csvData = "Date,Open,High,Low,Close,Volume\n" +
-                "2024-02-03,invalid,155,145,153,10000\n" +
-                "2024-02-02,145,152,144,147,12000";
+        String csvData = """
+                Date,Open,High,Low,Close,Volume
+                2024-02-03,invalid,155,145,153,10000
+                2024-02-02,145,152,144,147,12000""";
 
         when(restTemplate.getForObject(anyString(), eq(String.class))).thenReturn(csvData);
 
-        assertThrows(NumberFormatException.class, () -> {
-            burzaService.fetchHistoricalData("AAPL");
-        });
+        assertThrows(NumberFormatException.class, () -> burzaService.fetchHistoricalData("AAPL"));
     }
 }

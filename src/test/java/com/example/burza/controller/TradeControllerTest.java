@@ -1,7 +1,6 @@
 package com.example.burza.controller;
 
 import com.example.burza.model.Portfolio;
-import com.example.burza.model.TradeOrder;
 import com.example.burza.model.TradeResult;
 import com.example.burza.service.PortfolioService;
 import org.junit.jupiter.api.BeforeEach;

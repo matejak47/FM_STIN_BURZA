@@ -14,11 +14,11 @@ import java.util.List;
  */
 @Data
 @Service
-public class LoadSymbols {
+public class SymbolLoading {
     private final ObjectMapper objectMapper;
     private final ClassPathResource resource;
 
-    public LoadSymbols(ObjectMapper objectMapper) {
+    public SymbolLoading(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.resource = new ClassPathResource("data/symbols.json");
     }

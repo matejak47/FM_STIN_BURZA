@@ -15,16 +15,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class LoadSymbolsTest {
+class SymbolLoadingTest {
 
     @InjectMocks
-    private LoadSymbols loadSymbols;
+    private SymbolLoading symbolLoading;
 
     @Mock
     private ObjectMapper objectMapper;
-
-    @Mock
-    private InputStream inputStream;
 
     @BeforeEach
     void setUp() {
@@ -44,7 +41,7 @@ class LoadSymbolsTest {
         when(objectMapper.readValue(any(InputStream.class), eq(Symbols.class))).thenReturn(mockSymbols);
 
         // Spuštění metody
-        List<Symbol> result = loadSymbols.LoadSymbols();
+        List<Symbol> result = symbolLoading.LoadSymbols();
 
         // Ověření výsledků
         assertNotNull(result);
