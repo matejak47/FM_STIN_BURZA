@@ -43,23 +43,32 @@ public class StockService {
      */
     public List<DailyData> fetchDailyTimeSeries(String symbol) {
         String url = apiUrl + "?s=" + symbol + ".US&i=" + interval;
-
         String csvData = restTemplate.getForObject(url, String.class);
 
         if (csvData == null || csvData.isEmpty()) {
-            List<?> listResponse = restTemplate.getForObject(url, List.class);
+            List<?> rawList = restTemplate.getForObject(url, List.class);
+            List<String> listResponse = null;
+            if (rawList != null && !rawList.isEmpty()) {
+                listResponse = new ArrayList<>();
+                for (Object raw : rawList) {
+                    if (raw instanceof String) {
+                        listResponse.add((String) raw);
+                    }
+                }
+            }
+
             if (listResponse != null && !listResponse.isEmpty()) {
-                if (listResponse.get(0) instanceof String) {
-                    csvData = String.join("\n", (List<String>) listResponse);
+                if (listResponse.get(0) != null) {
+                    csvData = String.join("\n", listResponse);
                 } else {
-                    System.out.println("ERROR: Očekávaný formát je List<String>, ale API vrátilo: " + listResponse.get(0).getClass().getSimpleName());
+                    System.out.println("ERROR: Expected format is: List<String>, but API returned: " + listResponse.get(0).getClass().getSimpleName());
                     return List.of();
                 }
             }
         }
 
         if (csvData == null || csvData.isEmpty()) {
-            System.out.println("ERROR: API nevrátila žádná data!");
+            System.out.println("ERROR: API did not return any data!");
             return List.of();
         }
 
@@ -124,7 +133,6 @@ public class StockService {
                 break;
             }
         }
-        System.out.println(dateIndex);
         List<DailyData> recentDataList = new ArrayList<>();
         for (int i = 0; i < dateIndex; i++) {
             recentDataList.add(dailyDataList.get(i));
