@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { fetchStockData } from './utils/fetchStockData'
+import React, {useState} from 'react'
+import {fetchStockData} from './utils/fetchStockData'
 import StockDetail from './components/StockDetail'
 import SearchBar from './components/SearchBar'
 import FavouritesTable from './components/FavouritesTable'
@@ -9,8 +9,9 @@ function App() {
     const [selectedName, setSelectedName] = useState('')
     const [dailyData, setDailyData] = useState(null)
     const [selectedStockData, setSelectedStockData] = useState(null)
-    const [favourites, setFavourites] = useState([])
 
+    // Nyní ukládáme do favourites objekty: { symbol, name, quantity, totalValue }
+    const [favourites, setFavourites] = useState([])
 
     const handleSelectSymbol = (symbol, name) => {
         setSelectedSymbol(symbol)
@@ -28,7 +29,7 @@ function App() {
                 return
             }
 
-            // Data seřadíme chronologicky (od nejstaršího po nejnovější)
+            // Seřadíme data chronologicky (od nejstaršího po nejnovější)
             allData.sort((a, b) => new Date(a.date) - new Date(b.date))
             setDailyData(allData)
 
@@ -43,7 +44,6 @@ function App() {
                 low: lastEntry.low,
                 date: lastEntry.date,
                 volume: lastEntry.volume
-
             }
             setSelectedStockData(detail)
         } catch (error) {
@@ -52,12 +52,23 @@ function App() {
         }
     }
 
-    const handleToggleFavourite = (symbol) => {
-        if (favourites.includes(symbol)) {
-            setFavourites(favourites.filter(fav => fav !== symbol))
+    // Při přidání do oblíbených vytvoříme objekt s výchozím quantity = 0 a totalValue = 0
+    const handleToggleFavourite = (symbol, name) => {
+        const index = favourites.findIndex(f => f.symbol === symbol)
+
+        if (index !== -1) {
+            // Pokud už akcie ve favourites je, odstraníme ji
+            setFavourites(prev => prev.filter(f => f.symbol !== symbol))
         } else {
+            // Pokud tam ještě není, zkontrolujeme limit 5 oblíbených
             if (favourites.length < 5) {
-                setFavourites([...favourites, symbol])
+                const newFav = {
+                    symbol,
+                    name,
+                    quantity: 0,
+                    totalValue: 0
+                }
+                setFavourites(prev => [...prev, newFav])
             } else {
                 alert('Maximální počet oblíbených akcií je 5!')
             }
@@ -68,10 +79,10 @@ function App() {
         <div className="app-wrapper">
             <header className="header">
                 <div className="logo-area">
-                    <img src="/logoMRM.png" alt="Logo" className="logo" />
+                    <img src="/logoMRM.png" alt="Logo" className="logo"/>
                 </div>
                 <div className="search-area">
-                    <SearchBar onSelectSymbol={handleSelectSymbol} onShowStock={handleShowStock} />
+                    <SearchBar onSelectSymbol={handleSelectSymbol} onShowStock={handleShowStock}/>
                 </div>
             </header>
             <main className="main-content">
@@ -83,22 +94,23 @@ function App() {
                         onToggleFavourite={handleToggleFavourite}
                     />
                 ) : (
-                    <p style={{ marginTop: '2rem' }}>
+                    <p style={{marginTop: '2rem'}}>
                         Vyberte symbol a klikněte na "Search" pro zobrazení detailu akcie.
                     </p>
                 )}
             </main>
             <aside className="favourites-section">
-                <h2>Your favourites</h2>
-                <FavouritesTable favourites={favourites} />
+                <h2>Favourites</h2>
+                <FavouritesTable favourites={favourites} onToggleFavourite={handleToggleFavourite}/>
             </aside>
             <footer className="footer">
-                <p style={{ margin: 0 }}>&copy; Copyright 2025 - {new Date().getFullYear()}</p>
+                <p style={{margin: 0}}>&copy; Copyright 2025 - {new Date().getFullYear()}</p>
                 <a
                     href="https://github.com/matejak47/FM_STIN_BURZA"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
+                    {/* GitHub ikonka */}
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -106,7 +118,8 @@ function App() {
                         viewBox="0 0 24 24"
                         fill="currentColor"
                     >
-                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.799 8.207 11.387.6.111.793-.261.793-.578 0-.285-.011-1.04-.016-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.754-1.333-1.754-1.089-.744.082-.729.082-.729 1.204.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.996.107-.776.42-1.305.763-1.606-2.665-.305-5.467-1.333-5.467-5.931 0-1.31.468-2.381 1.237-3.222-.124-.304-.536-1.526.117-3.18 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.4 3-.404 1.02.004 2.04.137 3 .404 2.292-1.552 3.3-1.23 3.3-1.23.653 1.654.241 2.876.118 3.18.77.841 1.236 1.912 1.236 3.222 0 4.609-2.807 5.624-5.479 5.921.43.372.813 1.103.813 2.222 0 1.606-.015 2.9-.015 3.293 0 .32.192.694.8.576C20.565 21.796 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                        <path
+                            d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.799 8.207 11.387.6.111.793-.261.793-.578 0-.285-.011-1.04-.016-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.754-1.333-1.754-1.089-.744.082-.729.082-.729 1.204.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.996.107-.776.42-1.305.763-1.606-2.665-.305-5.467-1.333-5.467-5.931 0-1.31.468-2.381 1.237-3.222-.124-.304-.536-1.526.117-3.18 0 0 1.008-.322 3.3 1.23.96-.267 1.98-.4 3-.404 1.02.004 2.04.137 3 .404 2.292-1.552 3.3-1.23 3.3-1.23.653 1.654.241 2.876.118 3.18.77.841 1.236 1.912 1.236 3.222 0 4.609-2.807 5.624-5.479 5.921.43.372.813 1.103.813 2.222 0 1.606-.015 2.9-.015 3.293 0 .32.192.694.8.576C20.565 21.796 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
                 </a>
             </footer>
