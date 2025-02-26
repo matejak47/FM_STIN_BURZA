@@ -1,4 +1,15 @@
-function FavouritesTable({favourites, onToggleFavourite, onSelectFavourite}) {
+import React, {useEffect} from 'react';
+
+function FavouritesTable({favourites, portfolio, onSelectFavourite}) {
+    useEffect(() => {
+        console.log("Favourites:", favourites);
+        console.log("Portfolio:", portfolio);
+    }, [favourites, portfolio]);
+
+    if (!portfolio) {
+        return <p>Loading portfolio...</p>;
+    }
+
     return (
         <div className="favourites-table">
             {favourites.length === 0 ? (
@@ -7,55 +18,31 @@ function FavouritesTable({favourites, onToggleFavourite, onSelectFavourite}) {
                 <table>
                     <thead>
                     <tr>
-                        <th>Company name</th>
                         <th>Symbol</th>
                         <th>Quantity</th>
                         <th>Total Value</th>
-                        <th></th>
-                        {/* Column for the remove button */}
                     </tr>
                     </thead>
                     <tbody>
-                    {favourites.map((fav) => {
-                        const displayedQuantity = fav.quantity > 0 ? fav.quantity : '–'
-                        const displayedValue =
-                            fav.quantity > 0 && fav.totalValue > 0
-                                ? `$${fav.totalValue.toFixed(2)}`
-                                : '–'
+                    {favourites.map((symbol) => {
+                        const quantity = portfolio?.holdings?.[symbol] || 0;
+                        const totalValue = quantity > 0 ? `$${(quantity * 175).toFixed(2)}` : '–';
 
                         return (
-                            <tr key={fav.symbol}>
-                                <td
-                                    onClick={() => onSelectFavourite(fav.symbol, fav.name)}
-                                    style={{cursor: 'pointer'}}
-                                >
-                                    {fav.name}
+                            <tr key={symbol}>
+                                <td onClick={() => onSelectFavourite(symbol)} style={{cursor: 'pointer'}}>
+                                    {symbol}
                                 </td>
-                                <td
-                                    onClick={() => onSelectFavourite(fav.symbol, fav.name)}
-                                    style={{cursor: 'pointer'}}
-                                >
-                                    {fav.symbol}
-                                </td>
-                                <td>{displayedQuantity}</td>
-                                <td>{displayedValue}</td>
-                                <td>
-                                    <button
-                                        className="remove-favourite-button"
-                                        onClick={() => onToggleFavourite(fav.symbol, fav.name)}
-                                        title="Remove from favourites"
-                                    >
-                                        –
-                                    </button>
-                                </td>
+                                <td>{quantity > 0 ? quantity : '–'}</td>
+                                <td>{totalValue}</td>
                             </tr>
-                        )
+                        );
                     })}
                     </tbody>
                 </table>
             )}
         </div>
-    )
+    );
 }
 
-export default FavouritesTable
+export default FavouritesTable;
