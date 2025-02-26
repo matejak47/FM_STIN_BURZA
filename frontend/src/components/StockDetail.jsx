@@ -46,6 +46,7 @@ function StockDetail({stockData, dailyData, favourites, onToggleFavourite}) {
                 </button>
             </div>
 
+
             <div className="stock-body">
                 <div className="chart-section">
                     <div className="chart-wrapper">
