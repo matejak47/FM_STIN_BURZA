@@ -25,22 +25,22 @@ function StockDetail({stockData, dailyData, favourites, onToggleFavourite}) {
         maximumFractionDigits: 2
     })
 
-    const isFavourite = favourites.includes(symbol)
+    // Zjistíme, zda je akcie mezi oblíbenými
+    const isFavourite = favourites.some(f => f.symbol === symbol)
 
     return (
         <div className="stock-detail">
-            {/* Hlavička s názvem akcie a tlačítkem s textem a hvězdičkou */}
             <div className="stock-header">
                 <h2 className="company-name">{companyName}</h2>
                 <button
                     className="favourite-button"
-                    onClick={() => onToggleFavourite(symbol)}
+                    onClick={() => onToggleFavourite(symbol, companyName)}
                     title={isFavourite ? "Remove from favourites" : "Add to favourites"}
                 >
                     <span className="favourite-text">
                         {isFavourite ? "Remove from favourites" : "Add to favourites"}
                     </span>
-                    <span className="favourite-star">
+                    <span className="favourite-star" style={{color: 'yellow'}}>
                         {isFavourite ? "★" : "☆"}
                     </span>
                 </button>
