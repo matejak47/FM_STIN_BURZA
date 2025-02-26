@@ -28,7 +28,7 @@ jobs:
       - name: Install frontend dependencies
         run: |
           cd frontend
-          npm install
+          npm install moment recharts
 
       - name: Build frontend
         run: |
@@ -41,7 +41,7 @@ jobs:
           if (!(Test-Path "src/main/resources/static")) {
             New-Item -ItemType Directory -Path "src/main/resources/static"
           }
-          Copy-Item -Path frontend/dist/* -Destination src/main/resources/static -Recurse -Force
+          Copy-Item -Path frontend/build/* -Destination src/main/resources/static -Recurse -Force
 
       # 2️⃣ Build BACKEND (Spring Boot)
       - name: Set up Java version
