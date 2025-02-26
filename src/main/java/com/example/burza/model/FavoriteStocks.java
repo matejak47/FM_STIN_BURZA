@@ -1,6 +1,7 @@
 package com.example.burza.model;
 
 import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class FavoriteStocks {
 
     /**
      * Adds a symbol to favorites if limit not reached.
+     *
      * @param symbol Stock symbol to add
      * @return true if added successfully, false if limit reached
      */
@@ -35,6 +37,7 @@ public class FavoriteStocks {
 
     /**
      * Removes a symbol from favorites.
+     *
      * @param symbol Stock symbol to remove
      * @return true if removed, false if not found
      */

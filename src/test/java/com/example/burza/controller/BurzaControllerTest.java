@@ -1,6 +1,9 @@
 package com.example.burza.controller;
 
-import com.example.burza.model.*;
+import com.example.burza.model.DailyData;
+import com.example.burza.model.HistoricalData;
+import com.example.burza.model.Symbol;
+import com.example.burza.model.SymbolLoading;
 import com.example.burza.service.BurzaService;
 import com.example.burza.service.StockService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +18,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class BurzaControllerTest {
 

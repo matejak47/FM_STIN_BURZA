@@ -12,21 +12,23 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class BurzaApplication {
 
-	/**
-	 * Main entry point of the application.
-	 * @param args Command line arguments passed to the application
-	 */
-	public static void main(String[] args) {
+    /**
+     * Main entry point of the application.
+     *
+     * @param args Command line arguments passed to the application
+     */
+    public static void main(String[] args) {
 
-		SpringApplication.run(BurzaApplication.class, args);
-	}
+        SpringApplication.run(BurzaApplication.class, args);
+    }
 
-	/**
-	 * Creates and configures a RestTemplate bean for making HTTP requests.
-	 * @return Configured RestTemplate instance
-	 */
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplate();
-	}
+    /**
+     * Creates and configures a RestTemplate bean for making HTTP requests.
+     *
+     * @return Configured RestTemplate instance
+     */
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 }

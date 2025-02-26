@@ -3,6 +3,7 @@ package com.example.burza.controller;
 import com.example.burza.service.PortfolioService;
 import com.example.burza.service.StockService;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -18,6 +19,7 @@ public class PortfolioController {
 
     /**
      * Retrieves list of favorite stocks.
+     *
      * @return List of favorite stock symbols
      */
     @GetMapping("/favorites")
@@ -27,19 +29,20 @@ public class PortfolioController {
 
     @GetMapping("/favorites/decline")
     public List<String> getFavoriteStocksDecline(@RequestParam int days) {
-        List<String> symbols =  portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
-        return stockService.getSymbolsWithDecline(symbols,days);
+        List<String> symbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
+        return stockService.getSymbolsWithDecline(symbols, days);
 
     }
 
     @GetMapping("/favorites/increase")
     public List<String> getFavoriteStocksIncrease(@RequestParam int days) {
-        List<String> symbols =  portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
-        return stockService.getSymbolsWithIncrease(symbols,days);
+        List<String> symbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
+        return stockService.getSymbolsWithIncrease(symbols, days);
     }
 
     /**
      * Adds a stock to favorites.
+     *
      * @param symbol Stock symbol to add
      * @return true if added successfully, false if limit reached
      */
@@ -50,6 +53,7 @@ public class PortfolioController {
 
     /**
      * Removes a stock from favorites.
+     *
      * @param symbol Stock symbol to remove
      * @return true if removed successfully
      */

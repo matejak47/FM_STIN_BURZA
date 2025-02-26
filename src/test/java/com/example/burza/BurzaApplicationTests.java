@@ -11,27 +11,27 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class BurzaApplicationTests {
 
-	@Autowired
-	private ApplicationContext applicationContext;
+    @Autowired
+    private ApplicationContext applicationContext;
 
-	@Test
-	void contextLoads() {
-		assertNotNull(applicationContext);
-	}
+    @Test
+    void contextLoads() {
+        assertNotNull(applicationContext);
+    }
 
-	@Test
-	void restTemplateBeanExists() {
-		RestTemplate restTemplate = applicationContext.getBean(RestTemplate.class);
-		assertNotNull(restTemplate);
-	}
+    @Test
+    void restTemplateBeanExists() {
+        RestTemplate restTemplate = applicationContext.getBean(RestTemplate.class);
+        assertNotNull(restTemplate);
+    }
 
-	@Test
-	void applicationStartsWithoutErrors() {
-		assertTrue(applicationContext.containsBean("burzaApplication"));
-	}
+    @Test
+    void applicationStartsWithoutErrors() {
+        assertTrue(applicationContext.containsBean("burzaApplication"));
+    }
 
-	@Test
-	void mainMethodExecutesWithoutException() {
-		assertDoesNotThrow(() -> BurzaApplication.main(new String[]{}));
-	}
+    @Test
+    void mainMethodExecutesWithoutException() {
+        assertDoesNotThrow(() -> BurzaApplication.main(new String[]{}));
+    }
 }
