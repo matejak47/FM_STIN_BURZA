@@ -1,4 +1,4 @@
-function FavouritesTable({favourites, onToggleFavourite}) {
+function FavouritesTable({favourites, onToggleFavourite, onSelectFavourite}) {
     return (
         <div className="favourites-table">
             {favourites.length === 0 ? (
@@ -12,7 +12,7 @@ function FavouritesTable({favourites, onToggleFavourite}) {
                         <th>Quantity</th>
                         <th>Total Value</th>
                         <th></th>
-                        {/* Sloupec pro tlačítko odebrání */}
+                        {/* Column for the remove button */}
                     </tr>
                     </thead>
                     <tbody>
@@ -25,8 +25,18 @@ function FavouritesTable({favourites, onToggleFavourite}) {
 
                         return (
                             <tr key={fav.symbol}>
-                                <td>{fav.name}</td>
-                                <td>{fav.symbol}</td>
+                                <td
+                                    onClick={() => onSelectFavourite(fav.symbol, fav.name)}
+                                    style={{cursor: 'pointer'}}
+                                >
+                                    {fav.name}
+                                </td>
+                                <td
+                                    onClick={() => onSelectFavourite(fav.symbol, fav.name)}
+                                    style={{cursor: 'pointer'}}
+                                >
+                                    {fav.symbol}
+                                </td>
                                 <td>{displayedQuantity}</td>
                                 <td>{displayedValue}</td>
                                 <td>
