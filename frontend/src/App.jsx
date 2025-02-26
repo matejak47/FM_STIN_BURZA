@@ -9,6 +9,8 @@ function App() {
     const [selectedName, setSelectedName] = useState('')
     const [dailyData, setDailyData] = useState(null)
     const [selectedStockData, setSelectedStockData] = useState(null)
+
+    // Nyní ukládáme do favourites objekty: { symbol, name, quantity, totalValue }
     const [favourites, setFavourites] = useState([])
 
     const handleSelectSymbol = (symbol, name) => {
@@ -27,11 +29,11 @@ function App() {
                 return
             }
 
-            // Seřadíme data chronologicky
+            // Seřadíme data chronologicky (od nejstaršího po nejnovější)
             allData.sort((a, b) => new Date(a.date) - new Date(b.date))
             setDailyData(allData)
 
-            // Pro detail akcie vezmeme poslední záznam
+            // Pro zobrazení detailu vezmeme poslední záznam (aktuální den)
             const lastEntry = allData[allData.length - 1]
             const detail = {
                 symbol: selectedSymbol,
@@ -50,12 +52,23 @@ function App() {
         }
     }
 
-    const handleToggleFavourite = (symbol) => {
-        if (favourites.includes(symbol)) {
-            setFavourites(favourites.filter(fav => fav !== symbol))
+    // Při přidání do oblíbených vytvoříme objekt s výchozím quantity = 0 a totalValue = 0
+    const handleToggleFavourite = (symbol, name) => {
+        const index = favourites.findIndex(f => f.symbol === symbol)
+
+        if (index !== -1) {
+            // Pokud už akcie ve favourites je, odstraníme ji
+            setFavourites(prev => prev.filter(f => f.symbol !== symbol))
         } else {
+            // Pokud tam ještě není, zkontrolujeme limit 5 oblíbených
             if (favourites.length < 5) {
-                setFavourites([...favourites, symbol])
+                const newFav = {
+                    symbol,
+                    name,
+                    quantity: 0,
+                    totalValue: 0
+                }
+                setFavourites(prev => [...prev, newFav])
             } else {
                 alert('Maximální počet oblíbených akcií je 5!')
             }
@@ -87,7 +100,7 @@ function App() {
                 )}
             </main>
             <aside className="favourites-section">
-                <h2>Your favourites</h2>
+                <h2>Favourites</h2>
                 <FavouritesTable favourites={favourites} onToggleFavourite={handleToggleFavourite}/>
             </aside>
             <footer className="footer">
@@ -97,6 +110,7 @@ function App() {
                     target="_blank"
                     rel="noopener noreferrer"
                 >
+                    {/* GitHub ikonka */}
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
