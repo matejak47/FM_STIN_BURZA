@@ -3,6 +3,7 @@ import StockDetail from './components/StockDetail';
 import SearchBar from './components/SearchBar';
 import FavouritesTable from './components/FavouritesTable';
 import Portfolio from "./components/Portfolio.jsx";
+import FavouriteFilter from "./components/FavouriteFilter.jsx";
 
 function App() {
     const [selectedSymbol, setSelectedSymbol] = useState('');
@@ -13,25 +14,39 @@ function App() {
     const [favourites, setFavourites] = useState([]);
     const [portfolio, setPortfolio] = useState({holdings: {}});
     const [view, setView] = useState('home');
+    const [allStocks, setAllStocks] = useState([]);
 
-    const handleShowStock = async (symbol) => {
+    useEffect(() => {
+        fetch("/api/burza/all")
+            .then(response => response.json())
+            .then(data => {
+                setAllStocks(data);
+                console.log("Loaded stock symbols and names:", data);
+            })
+            .catch(error => console.error("Error fetching stock list:", error));
+    }, []);
+
+
+    const handleShowStock = async (symbol, name = '') => {
         try {
+            console.log("Fetching stock for:", symbol, "with name:", name);  // Debug log
+
             const response = await fetch(`/api/burza/daily?symbol=${symbol}`);
             if (!response.ok) throw new Error('Failed to fetch stock data');
             const data = await response.json();
 
             if (!data || data.length === 0) {
                 setSelectedStockData(null);
-                setDailyData(null);
+                setDailyData([]);
                 return;
             }
 
             data.sort((a, b) => new Date(a.date) - new Date(b.date));
-            setDailyData(data);
 
             const lastEntry = data[data.length - 1];
             const stockDetails = {
                 symbol,
+                companyName: name || "Unknown Company",  // ✅ Tady zajistíme, že se používá správné jméno
                 open: lastEntry.open,
                 close: lastEntry.close,
                 high: lastEntry.high,
@@ -40,12 +55,15 @@ function App() {
                 volume: lastEntry.volume
             };
 
+            console.log("Stock details being set:", stockDetails);  // ✅ Ověření, co se nastavuje
             setSelectedStockData(stockDetails);
+            setDailyData(data);
         } catch (error) {
             console.error('Error fetching stock data:', error);
             alert('Failed to load stock data.');
         }
     };
+
 
     // Načtení portfolia a zůstatku z backendu
     const fetchPortfolio = async () => {
@@ -128,8 +146,7 @@ function App() {
             const result = await response.json();
             console.log("Trade result:", result);
             if (result.success) {
-                alert(`Successfully bought ${quantity} shares of ${symbol}`);
-                fetchPortfolio(); // ✅ Aktualizace portfolia po nákupu
+                await fetchPortfolio(); // ✅ Aktualizace portfolia po nákupu
             } else {
                 alert(result.message);
             }
@@ -150,7 +167,7 @@ function App() {
             const result = await response.json();
             if (result.success) {
                 alert(`Successfully sold ${quantity} shares of ${symbol}`);
-                fetchPortfolio();
+                await fetchPortfolio();
             } else {
                 alert(result.message);
             }
@@ -225,11 +242,14 @@ function App() {
                             onToggleFavourite={handleToggleFavourite}
                             portfolio={portfolio}
                             onSelectFavourite={handleShowStock}
+                            allStocks={allStocks}
                         />
                     </aside>
+                    <FavouriteFilter onSelectFavourite={handleShowStock} allStocks={allStocks}/>
                 </>
             ) : (
-                <Portfolio/>
+                <Portfolio setBalance={setBalance}/>
+
             )}
 
             <footer className="footer">
@@ -249,7 +269,7 @@ function App() {
                         fill="currentColor"
                     >
                         <path
-                            d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.799 8.207 11.387.6.111.793-.261.793-.578 0-.285-.011-1.04-.016-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.754-1.333-1.754-1.089-.744.082-.729.082-.729 1.204.085 1.838 1.237 1.838 1.237 1.07 1.834 2.807 1.304 3.492.996.107-.776.42-1.305.763-1.606-2.665-.305-5.467-1.333-5.467-5.931"
+                            d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z"></path>
                         />
                     </svg>
                 </a>

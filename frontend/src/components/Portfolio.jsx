@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from "react";
 import "./Portfolio.css";
 
-const Portfolio = () => {
+const Portfolio = ({setBalance}) => { // Přijímá setBalance z App.jsx
     const [portfolio, setPortfolio] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Načtení portfolia z backendu při načtení komponenty
     useEffect(() => {
         fetch("/api/trade/portfolio")
             .then(response => response.json())
@@ -29,33 +28,32 @@ const Portfolio = () => {
             return;
         }
 
-        const sellOrder = {
-            symbol,
-            orderType: "SELL",
-            quantity: quantityToSell
-        };
-
         try {
             const response = await fetch("/api/trade/execute", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(sellOrder)
+                body: JSON.stringify({
+                    symbol,
+                    orderType: "SELL",
+                    quantity: quantityToSell
+                })
             });
 
             const result = await response.json();
 
             if (result.success) {
-                alert(`Successfully sold ${quantityToSell} shares of ${symbol}.\nNew balance: $${result.remainingBalance.toFixed(2)}`);
                 setPortfolio(prev => ({
                     ...prev,
                     holdings: {
                         ...prev.holdings,
-                        [symbol]: prev.holdings[symbol] - quantityToSell
+                        [symbol]: Math.max(0, prev.holdings[symbol] - quantityToSell)
                     },
                     balance: result.remainingBalance
                 }));
+
+                setBalance(result.remainingBalance); // ✅ Aktualizace celkové balance
             } else {
                 alert(result.message);
             }
