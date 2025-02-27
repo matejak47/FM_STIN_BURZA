@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import "./Portfolio.css";
 
 const Portfolio = () => {
     const [portfolio, setPortfolio] = useState(null);
@@ -83,17 +84,19 @@ const Portfolio = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {Object.entries(portfolio.holdings).map(([symbol, quantity]) => (
-                        <tr key={symbol}>
-                            <td>{symbol}</td>
-                            <td>{quantity}</td>
-                            <td>
-                                <button className="sell-button" onClick={() => handleSellStock(symbol)}>
-                                    Sell
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                    {Object.entries(portfolio.holdings)
+                        .filter(([_, quantity]) => quantity > 0) // ✅ Odstranění akcií s hodnotou 0
+                        .map(([symbol, quantity]) => (
+                            <tr key={symbol}>
+                                <td>{symbol}</td>
+                                <td>{quantity}</td>
+                                <td>
+                                    <button className="sell-button" onClick={() => handleSellStock(symbol)}>
+                                        Sell
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             )}
