@@ -14,28 +14,39 @@ function App() {
     const [favourites, setFavourites] = useState([]);
     const [portfolio, setPortfolio] = useState({holdings: {}});
     const [view, setView] = useState('home');
+    const [allStocks, setAllStocks] = useState([]);
+
+    useEffect(() => {
+        fetch("/api/burza/all")
+            .then(response => response.json())
+            .then(data => {
+                setAllStocks(data);
+                console.log("Loaded stock symbols and names:", data);
+            })
+            .catch(error => console.error("Error fetching stock list:", error));
+    }, []);
+
 
     const handleShowStock = async (symbol, name = '') => {
         try {
             console.log("Fetching stock for:", symbol, "with name:", name);  // Debug log
+
             const response = await fetch(`/api/burza/daily?symbol=${symbol}`);
             if (!response.ok) throw new Error('Failed to fetch stock data');
             const data = await response.json();
 
-
             if (!data || data.length === 0) {
                 setSelectedStockData(null);
-                setDailyData(null);
+                setDailyData([]);
                 return;
             }
 
             data.sort((a, b) => new Date(a.date) - new Date(b.date));
-            setDailyData(data);
 
             const lastEntry = data[data.length - 1];
             const stockDetails = {
                 symbol,
-                companyName: name || "Unknown Company",  // ✅ Zajištění, že máme správné jméno
+                companyName: name || "Unknown Company",  // ✅ Tady zajistíme, že se používá správné jméno
                 open: lastEntry.open,
                 close: lastEntry.close,
                 high: lastEntry.high,
@@ -44,8 +55,9 @@ function App() {
                 volume: lastEntry.volume
             };
 
-            console.log("Stock details being set:", stockDetails); // ✅ Debug log
+            console.log("Stock details being set:", stockDetails);  // ✅ Ověření, co se nastavuje
             setSelectedStockData(stockDetails);
+            setDailyData(data);
         } catch (error) {
             console.error('Error fetching stock data:', error);
             alert('Failed to load stock data.');
@@ -230,9 +242,10 @@ function App() {
                             onToggleFavourite={handleToggleFavourite}
                             portfolio={portfolio}
                             onSelectFavourite={handleShowStock}
+                            allStocks={allStocks}
                         />
                     </aside>
-                    <FavouriteFilter onSelectFavourite={handleShowStock}/>
+                    <FavouriteFilter onSelectFavourite={handleShowStock} allStocks={allStocks}/>
                 </>
             ) : (
                 <Portfolio setBalance={setBalance}/>
