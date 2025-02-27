@@ -297,4 +297,29 @@ class StockServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
+
+
+    @Test
+    void testFetchDailyDataByTime_BoundaryCheck() {
+        List<DailyData> data = new ArrayList<>();
+        data.add(new DailyData("2024-02-07", 100.0, 110.0, 90.0, 105.0, 10000));
+        data.add(new DailyData("2024-02-06", 105.0, 115.0, 95.0, 110.0, 12000));
+
+        List<DailyData> result = stockService.fetchDailyDataByTime(data, "2024-02-06");
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+    }
+
+
+    @Test
+    void testGetSymbolsWithIncrease_NoIncrease() {
+        List<String> symbols = List.of("AAPL");
+        List<DailyData> data = new ArrayList<>();
+        data.add(new DailyData("2024-02-07", 100.0, 110.0, 90.0, 100.0, 10000));
+        data.add(new DailyData("2024-02-06", 100.0, 110.0, 90.0, 100.0, 10000));
+        doReturn(data).when(stockService).fetchDailyTimeSeries("AAPL");
+
+        List<String> result = stockService.getSymbolsWithIncrease(symbols, 2);
+        assertTrue(result.isEmpty());
+    }
 }

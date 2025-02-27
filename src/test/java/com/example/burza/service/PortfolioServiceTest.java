@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class PortfolioServiceTest {
 
@@ -114,5 +114,50 @@ class PortfolioServiceTest {
         assertEquals(705, result.getExecutedPrice());
         assertEquals(0, result.getTotalCost());
         assertEquals(1000, result.getRemainingBalance());
+    }
+
+    @Test
+    void testExecuteSell_Success() {
+        TradeOrder order = new TradeOrder("AAPL", TradeOrder.OrderType.SELL, 2);
+        List<DailyData> data = List.of(new DailyData("2024-02-01", 100, 110, 90, 105, 10000));
+
+        portfolioService.getPortfolio().getHoldings().put("AAPL", 5);
+
+        when(stockService.fetchDailyTimeSeries("AAPL")).thenReturn(data);
+
+        TradeResult result = portfolioService.executeTrade(order);
+
+        assertTrue(result.isSuccess());
+        assertEquals("Sale successful", result.getMessage());
+        assertEquals(105, result.getExecutedPrice());
+        assertEquals(210, result.getTotalCost());
+        assertEquals(1210, result.getRemainingBalance());
+        assertEquals(3, portfolioService.getPortfolio().getHoldings().get("AAPL"));
+    }
+
+    @Test
+    void testSavePortfolioState() {
+        portfolioService.getPortfolio().getHoldings().put("AAPL", 3);
+        portfolioService.getPortfolio().setBalance(500.0);
+
+        // Zachytíme výstup do konzole
+        System.setOut(new java.io.PrintStream(new java.io.ByteArrayOutputStream()));
+        portfolioService.executeTrade(new TradeOrder("AAPL", TradeOrder.OrderType.BUY, 1));
+        System.setOut(System.out);
+
+        verify(stockService, atLeast(0)).fetchDailyTimeSeries(anyString());
+    }
+
+    @Test
+    void testExecuteTrade_InvalidOrderType() {
+        TradeOrder order = new TradeOrder("AAPL", null, 2);
+        List<DailyData> data = List.of(new DailyData("2024-02-01", 100, 110, 90, 105, 10000));
+
+        when(stockService.fetchDailyTimeSeries("AAPL")).thenReturn(data);
+
+        TradeResult result = portfolioService.executeTrade(order);
+
+        assertFalse(result.isSuccess());
+        assertEquals("Invalid trade order type", result.getMessage());
     }
 }

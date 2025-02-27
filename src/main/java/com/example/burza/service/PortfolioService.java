@@ -38,6 +38,10 @@ public class PortfolioService {
      * @return the result of the trade execution
      */
     public TradeResult executeTrade(TradeOrder order) {
+        if (order.getOrderType() == null) {
+            return new TradeResult(false, "Invalid trade order type", 0, 0, portfolio.getBalance());
+        }
+
         List<DailyData> dailyData = stockService.fetchDailyTimeSeries(order.getSymbol());
         if (dailyData.isEmpty()) {
             return new TradeResult(false, "Impossible to get the current value of the stock", 0, 0, portfolio.getBalance());
@@ -51,7 +55,7 @@ public class PortfolioService {
         } else {
             result = executeSell(order, currentPrice);
         }
-        
+
         savePortfolioState();
         return result;
     }
