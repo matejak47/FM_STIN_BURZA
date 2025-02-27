@@ -1,0 +1,51 @@
+.portfolio-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.portfolio-content {
+    flex-grow: 1;
+    padding: 20px;
+    text-align: center;
+}
+
+.portfolio-table {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background: #333;
+    color: #fff;
+}
+
+.portfolio-table th,
+.portfolio-table td {
+    border: 1px solid #555;
+    padding: 10px;
+    text-align: center;
+}
+
+.portfolio-table th {
+    background: #222;
+}
+
+.sell-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.sell-button:hover {
+    background-color: darkred;
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+    background: #222;
+    color: #fff;
+}
