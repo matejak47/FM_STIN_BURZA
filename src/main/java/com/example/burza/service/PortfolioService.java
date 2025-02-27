@@ -79,7 +79,14 @@ public class PortfolioService {
         }
 
         double totalValue = currentPrice * order.getQuantity();
-        portfolio.getHoldings().put(order.getSymbol(), currentQuantity - order.getQuantity());
+        int newQuantity = currentQuantity - order.getQuantity();
+
+        if (newQuantity > 0) {
+            portfolio.getHoldings().put(order.getSymbol(), newQuantity);
+        } else {
+            portfolio.getHoldings().remove(order.getSymbol()); // ✅ Odstranění akcie s hodnotou 0
+        }
+
         portfolio.setBalance(portfolio.getBalance() + totalValue);
 
         // ✅ Uložit změnu

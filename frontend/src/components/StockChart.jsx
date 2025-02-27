@@ -7,7 +7,8 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer
-} from 'recharts'
+}
+from 'recharts'
 import moment from 'moment'
 
 function StockChart({ dailyData, lineColor }) {
