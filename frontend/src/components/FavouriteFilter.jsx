@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import "./FavouriteFilter.css"
 
-function FavouriteFilter({onSelectFavourite}) {
+function FavouriteFilter({onSelectFavourite, allStocks}) {
     const [days, setDays] = useState('');
     const [filteredFavourites, setFilteredFavourites] = useState([]);
 
@@ -54,7 +54,11 @@ function FavouriteFilter({onSelectFavourite}) {
                     <tbody>
                     {filteredFavourites.map((symbol) => (
                         <tr key={symbol}>
-                            <td onClick={() => onSelectFavourite(symbol, portfolio.holdings[symbol]?.name || symbol)}>
+                            <td onClick={() => {
+                                const stock = allStocks.find(s => s.symbol === symbol);
+                                const companyName = stock ? stock.name : symbol;
+                                onSelectFavourite(symbol, companyName);
+                            }}>
                                 {symbol}</td>
                         </tr>
                     ))}
