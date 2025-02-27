@@ -69,10 +69,7 @@ public class PortfolioService {
         int currentQuantity = portfolio.getHoldings().getOrDefault(order.getSymbol(), 0);
         portfolio.getHoldings().put(order.getSymbol(), currentQuantity + order.getQuantity());
         portfolio.setBalance(portfolio.getBalance() - totalCost);
-
-        // ✅ Uložit změnu
         savePortfolioState();
-
         return new TradeResult(true, "Purchase successful", currentPrice, totalCost, portfolio.getBalance());
     }
 

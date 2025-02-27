@@ -54,7 +54,7 @@ function FavouriteFilter({onSelectFavourite}) {
                     <tbody>
                     {filteredFavourites.map((symbol) => (
                         <tr key={symbol}>
-                            <td onClick={() => onSelectFavourite(symbol)} style={{cursor: 'pointer'}}>
+                            <td onClick={() => onSelectFavourite(symbol, portfolio.holdings[symbol]?.name || symbol)}>
                                 {symbol}</td>
                         </tr>
                     ))}
