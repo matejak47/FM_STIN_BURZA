@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 
-function FavouritesTable({ favourites, portfolio, onSelectFavourite }) {
+function FavouritesTable({favourites, portfolio, onSelectFavourite}) {
     useEffect(() => {
         console.log("Favourites:", favourites);
         console.log("Portfolio:", portfolio);
@@ -24,7 +24,7 @@ function FavouritesTable({ favourites, portfolio, onSelectFavourite }) {
                     <tbody>
                     {favourites.map((symbol) => (
                         <tr key={symbol}>
-                            <td onClick={() => onSelectFavourite(symbol)} style={{ cursor: 'pointer' }}>
+                            <td onClick={() => onSelectFavourite(symbol, portfolio.holdings[symbol]?.name || symbol)}>
                                 {symbol}
                             </td>
                         </tr>

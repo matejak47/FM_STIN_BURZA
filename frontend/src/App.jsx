@@ -15,11 +15,13 @@ function App() {
     const [portfolio, setPortfolio] = useState({holdings: {}});
     const [view, setView] = useState('home');
 
-    const handleShowStock = async (symbol) => {
+    const handleShowStock = async (symbol, name = '') => {
         try {
+            console.log("Fetching stock for:", symbol, "with name:", name);  // Debug log
             const response = await fetch(`/api/burza/daily?symbol=${symbol}`);
             if (!response.ok) throw new Error('Failed to fetch stock data');
             const data = await response.json();
+
 
             if (!data || data.length === 0) {
                 setSelectedStockData(null);
@@ -33,6 +35,7 @@ function App() {
             const lastEntry = data[data.length - 1];
             const stockDetails = {
                 symbol,
+                companyName: name || "Unknown Company",  // ✅ Zajištění, že máme správné jméno
                 open: lastEntry.open,
                 close: lastEntry.close,
                 high: lastEntry.high,
@@ -41,12 +44,14 @@ function App() {
                 volume: lastEntry.volume
             };
 
+            console.log("Stock details being set:", stockDetails); // ✅ Debug log
             setSelectedStockData(stockDetails);
         } catch (error) {
             console.error('Error fetching stock data:', error);
             alert('Failed to load stock data.');
         }
     };
+
 
     // Načtení portfolia a zůstatku z backendu
     const fetchPortfolio = async () => {

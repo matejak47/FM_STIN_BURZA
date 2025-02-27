@@ -47,7 +47,12 @@ function StockDetail({stockData, dailyData, favourites, onToggleFavourite, onBuy
                     className="favourite-button"
                     onClick={() => onToggleFavourite(symbol)}
                 >
-                    {favourites.includes(symbol) ? '★ Remove from favourites' : '☆ Add to favourites'}
+                        <span className="favourite-text">
+                            {favourites.includes(symbol) ? 'Remove from favourites' : 'Add to favourites'}
+                        </span>
+                    <span className="favourite-star">
+                            {favourites.includes(symbol) ? '★' : '☆'}
+                        </span>
                 </button>
 
             </div>
