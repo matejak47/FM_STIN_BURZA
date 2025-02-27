@@ -129,8 +129,7 @@ function App() {
             const result = await response.json();
             console.log("Trade result:", result);
             if (result.success) {
-                alert(`Successfully bought ${quantity} shares of ${symbol}`);
-                fetchPortfolio(); // ✅ Aktualizace portfolia po nákupu
+                await fetchPortfolio(); // ✅ Aktualizace portfolia po nákupu
             } else {
                 alert(result.message);
             }
@@ -151,7 +150,7 @@ function App() {
             const result = await response.json();
             if (result.success) {
                 alert(`Successfully sold ${quantity} shares of ${symbol}`);
-                fetchPortfolio();
+                await fetchPortfolio();
             } else {
                 alert(result.message);
             }
@@ -231,7 +230,8 @@ function App() {
                     <FavouriteFilter onSelectFavourite={handleShowStock}/>
                 </>
             ) : (
-                <Portfolio/>
+                <Portfolio setBalance={setBalance}/>
+
             )}
 
             <footer className="footer">
