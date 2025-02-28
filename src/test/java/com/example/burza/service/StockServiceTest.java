@@ -11,13 +11,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 class StockServiceTest {
 
@@ -37,9 +38,11 @@ class StockServiceTest {
 
     @Test
     void testFetchDailyTimeSeries_AsString() {
-        String fakeCsvData = "Date,Open,High,Low,Close,Volume\n" +
-                "2024-02-01,100,110,90,105,10000\n" +
-                "2024-02-02,105,115,95,110,12000\n";
+        String fakeCsvData = """
+                Date,Open,High,Low,Close,Volume
+                2024-02-01,100,110,90,105,10000
+                2024-02-02,105,115,95,110,12000
+                """;
 
         when(restTemplate.getForObject(anyString(), eq(String.class)))
                 .thenReturn(fakeCsvData);
@@ -89,7 +92,6 @@ class StockServiceTest {
         when(restTemplate.getForObject(anyString(), eq(String.class)))
                 .thenReturn(null);
 
-        // Vrátit seznam, který neobsahuje řetězce ale např. čísla
         List<Integer> invalidList = Arrays.asList(1, 2, 3);
         when(restTemplate.getForObject(anyString(), eq(List.class)))
                 .thenReturn(invalidList);
@@ -113,8 +115,10 @@ class StockServiceTest {
 
     @Test
     void testFetchDailyTimeSeries_InvalidCsvFormat() {
-        String invalidCsvData = "Date,Open,High,Low,Close,Volume\n" +
-                "2024-02-01,xxx,110,90,105,10000\n"; // "xxx" není číslo
+        String invalidCsvData = """
+                Date,Open,High,Low,Close,Volume
+                2024-02-01,xxx,110,90,105,10000
+                """;
 
         when(restTemplate.getForObject(anyString(), eq(String.class)))
                 .thenReturn(invalidCsvData);
@@ -280,8 +284,10 @@ class StockServiceTest {
 
     @Test
     void testParseCsvToDailyData_IncompleteValues() {
-        String incompleteCsv = "Date,Open,High,Low,Close,Volume\n" +
-                "2024-02-01,100,110,90\n"; // Chybí close a volume
+        String incompleteCsv = """
+                Date,Open,High,Low,Close,Volume
+                2024-02-01,100,110,90
+                """;
 
         when(restTemplate.getForObject(anyString(), eq(String.class)))
                 .thenReturn(incompleteCsv);
@@ -289,6 +295,31 @@ class StockServiceTest {
         List<DailyData> result = stockService.fetchDailyTimeSeries("AAPL");
 
         assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+
+    @Test
+    void testFetchDailyDataByTime_BoundaryCheck() {
+        List<DailyData> data = new ArrayList<>();
+        data.add(new DailyData("2024-02-07", 100.0, 110.0, 90.0, 105.0, 10000));
+        data.add(new DailyData("2024-02-06", 105.0, 115.0, 95.0, 110.0, 12000));
+
+        List<DailyData> result = stockService.fetchDailyDataByTime(data, "2024-02-06");
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+    }
+
+
+    @Test
+    void testGetSymbolsWithIncrease_NoIncrease() {
+        List<String> symbols = List.of("AAPL");
+        List<DailyData> data = new ArrayList<>();
+        data.add(new DailyData("2024-02-07", 100.0, 110.0, 90.0, 100.0, 10000));
+        data.add(new DailyData("2024-02-06", 100.0, 110.0, 90.0, 100.0, 10000));
+        doReturn(data).when(stockService).fetchDailyTimeSeries("AAPL");
+
+        List<String> result = stockService.getSymbolsWithIncrease(symbols, 2);
         assertTrue(result.isEmpty());
     }
 }

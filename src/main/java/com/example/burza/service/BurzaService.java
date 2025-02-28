@@ -4,6 +4,7 @@ import com.example.burza.model.HistoricalData;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class BurzaService {
 
     /**
      * Constructs BurzaService with required RestTemplate.
+     *
      * @param restTemplate Template for making HTTP requests
      */
     public BurzaService(RestTemplate restTemplate) {
@@ -34,6 +36,7 @@ public class BurzaService {
 
     /**
      * Fetches historical data for a specific stock symbol.
+     *
      * @param symbol Stock symbol to fetch data for
      * @return List of historical data points
      */
@@ -53,6 +56,7 @@ public class BurzaService {
 
     /**
      * Filters data to show only downward price movements.
+     *
      * @param data List of historical data to filter
      * @return Filtered list showing only price decreases
      */
@@ -65,6 +69,7 @@ public class BurzaService {
 
     /**
      * Filters data to show only upward price movements.
+     *
      * @param data List of historical data to filter
      * @return Filtered list showing only price increases
      */
@@ -83,7 +88,7 @@ public class BurzaService {
                 .toList();
 
         if (lines.size() < 2) {
-            System.out.println("ERROR: CSV neobsahuje žádná data!");
+            System.out.println("ERROR: CSV does not contain any data!");
             return historicalDataList;
         }
 

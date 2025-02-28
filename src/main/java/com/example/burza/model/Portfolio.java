@@ -1,12 +1,7 @@
 package com.example.burza.model;
 
 import lombok.Data;
-import java.util.Map;
 
-/**
- * Data model representing a user's portfolio.
- */
-import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
 
