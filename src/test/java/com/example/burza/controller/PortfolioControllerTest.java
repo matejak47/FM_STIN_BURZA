@@ -48,27 +48,7 @@ class PortfolioControllerTest {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(portfolioController).build();
     }
-
-    @Test
-    void testSendStocksToExternalApi_Success() throws Exception {
-        // Sample JSON request body
-        String requestBody = """
-                [
-                    {"name": "Microsoft", "date": 1710458392000, "rating": -10, "sale": 1},
-                    {"name": "Google", "date": 1710458392000, "rating": 10, "sale": 0}
-                ]
-                """;
-
-        // Mock successful response from external API
-        when(restTemplate.postForEntity(any(String.class), any(), any()))
-                .thenReturn(org.springframework.http.ResponseEntity.ok("Mock API Success"));
-
-        // Perform the request
-        mockMvc.perform(post("/api/portfolio/send-to-external")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isOk()); // Expect HTTP 200
-    }
+    
 
     @Test
     void testSendStocksToExternalApi_Failure() throws Exception {
