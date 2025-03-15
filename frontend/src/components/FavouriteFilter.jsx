@@ -1,9 +1,35 @@
 import React, {useState} from 'react';
-import "./FavouriteFilter.css"
+import "./FavouriteFilter.css";
 
 function FavouriteFilter({onSelectFavourite, allStocks}) {
     const [days, setDays] = useState('');
     const [filteredFavourites, setFilteredFavourites] = useState([]);
+
+    const sendToBackend = async (data) => {
+        if (!data.length) {
+            console.warn("No data to send.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/portfolio/send-to-external`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to send data. Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log("Data successfully sent to backend:", result);
+        } catch (error) {
+            console.error("Error sending data to backend:", error);
+        }
+    };
 
     const handleIncrease = async () => {
         if (!days) return;
@@ -11,8 +37,11 @@ function FavouriteFilter({onSelectFavourite, allStocks}) {
             const response = await fetch(`/api/portfolio/favorites/increase?days=${days}`);
             const data = await response.json();
             setFilteredFavourites(data);
+
+            // Send data to backend after fetching
+            await sendToBackend(data);
         } catch (error) {
-            console.error("Error increasing favourites:", error);
+            console.error("Error fetching increasing favourites:", error);
         }
     };
 
@@ -22,8 +51,11 @@ function FavouriteFilter({onSelectFavourite, allStocks}) {
             const response = await fetch(`/api/portfolio/favorites/decline?days=${days}`);
             const data = await response.json();
             setFilteredFavourites(data);
+
+            // Send data to backend after fetching
+            await sendToBackend(data);
         } catch (error) {
-            console.error("Error declining favourites:", error);
+            console.error("Error fetching declining favourites:", error);
         }
     };
 
@@ -48,18 +80,23 @@ function FavouriteFilter({onSelectFavourite, allStocks}) {
                 <table>
                     <thead>
                     <tr>
-                        <th>Filtered Symbols</th>
+                        <th>Company</th>
+                        <th>Date</th>
+                        <th>Rating</th>
+                        <th>Sale</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {filteredFavourites.map((symbol) => (
-                        <tr key={symbol}>
-                            <td onClick={() => {
-                                const stock = allStocks.find(s => s.symbol === symbol);
-                                const companyName = stock ? stock.name : symbol;
-                                onSelectFavourite(symbol, companyName);
-                            }}>
-                                {symbol}</td>
+                    {filteredFavourites.map((stock) => (
+                        <tr key={stock.name}>
+                            <td
+                                onClick={() => onSelectFavourite(stock.name, stock.name)}
+                                className="clickable">
+                                {stock.name}
+                            </td>
+                            <td>{new Date(stock.date).toLocaleDateString()}</td>
+                            <td>{stock.rating}</td>
+                            <td>{stock.sale !== null ? stock.sale : "N/A"}</td>
                         </tr>
                     ))}
                     </tbody>
@@ -67,7 +104,6 @@ function FavouriteFilter({onSelectFavourite, allStocks}) {
             )}
         </div>
     );
-
 }
 
 export default FavouriteFilter;
