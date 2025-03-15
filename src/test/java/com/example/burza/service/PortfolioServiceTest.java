@@ -1,6 +1,7 @@
 package com.example.burza.service;
 
 import com.example.burza.model.DailyData;
+import com.example.burza.model.StockResponse;
 import com.example.burza.model.TradeOrder;
 import com.example.burza.model.TradeResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,22 @@ class PortfolioServiceTest {
         MockitoAnnotations.openMocks(this);
         portfolioService.getPortfolio().setBalance(1000.0);
         portfolioService.getPortfolio().setHoldings(new HashMap<>());
+    }
+
+    @Test
+    void testParseToJson() {
+        List<String> symbols = List.of("AAPL", "TSLA");
+        List<DailyData> dailyDataList = List.of(new DailyData("2024-02-01", 100, 110, 90, 105, 10000));
+
+        when(stockService.fetchDailyTimeSeries("AAPL")).thenReturn(dailyDataList);
+        when(stockService.fetchDailyTimeSeries("TSLA")).thenReturn(dailyDataList);
+
+        List<StockResponse> result = portfolioService.parseToJson(symbols);
+
+        assertEquals(2, result.size());
+        assertEquals("AAPL", result.get(0).getName());
+        assertEquals("TSLA", result.get(1).getName());
+        assertTrue(result.get(0).getDate() > 0); // Timestamp should be valid
     }
 
     @Test

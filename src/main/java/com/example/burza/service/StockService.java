@@ -118,6 +118,7 @@ public class StockService {
         return increasingSymbols;
     }
 
+
     /**
      * Fetches daily data up to a specific start date.
      *

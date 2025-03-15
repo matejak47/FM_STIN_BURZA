@@ -1,13 +1,11 @@
 package com.example.burza.service;
 
-import com.example.burza.model.DailyData;
-import com.example.burza.model.Portfolio;
-import com.example.burza.model.TradeOrder;
-import com.example.burza.model.TradeResult;
+import com.example.burza.model.*;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +28,27 @@ public class PortfolioService {
         this.stockService = stockService;
         this.portfolio = new Portfolio();
     }
+
+    public List<StockResponse> parseToJson(List<String> symbols) {
+        List<StockResponse> responseList = new ArrayList<>();
+        try {
+            for (String symbol : symbols) {
+                List<DailyData> dailyData = stockService.fetchDailyTimeSeries(symbol);
+
+                if (dailyData.isEmpty()) continue;  // Ignore empty data
+                long timestamp = System.currentTimeMillis(); // Convert date to timestamp
+
+                int rating = 0;
+                int sale = 0;
+
+                responseList.add(new StockResponse(symbol, timestamp, rating, sale));
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching stock ratings: " + e.getMessage());
+        }
+        return responseList;
+    }
+
 
     /**
      * Executes a trade order based on current stock prices.
