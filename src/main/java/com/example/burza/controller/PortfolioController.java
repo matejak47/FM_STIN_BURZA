@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/portfolio")
 public class PortfolioController {
-    private static final String EXTERNAL_API_URL = "https://web.postman.co/workspace/My-Workspace~fcdea791-0555-4510-8cff-6edfde81a02a/mock/35d98169-e4da-4367-bdbc-506639f64d28";
+    private static final String EXTERNAL_API_URL = "https://6508cb37-03fb-4cac-bf4b-eacf87eebb00.mock.pstmn.io";
     private final RestTemplate restTemplate = new RestTemplate();
     private final PortfolioService portfolioService;
     private final StockService stockService;
@@ -61,6 +61,24 @@ public class PortfolioController {
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to send data to external API: External API error");
+        }
+    }
+
+    @PostMapping("/receive-from-external")
+    public ResponseEntity<String> receiveAndRespond(@RequestBody List<StockResponse> receivedData) {
+        try {
+            for (StockResponse stock : receivedData) {
+                stock.setSale(stock.getRating() >= 5 ? 1 : 0);
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<List<StockResponse>> requestEntity = new HttpEntity<>(receivedData, headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity(EXTERNAL_API_URL, requestEntity, String.class);
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to process received data: " + e.getMessage());
         }
     }
 
