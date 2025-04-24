@@ -68,7 +68,7 @@ public class PortfolioController {
     public ResponseEntity<String> receiveAndRespond(@RequestBody List<StockResponse> receivedData) {
         try {
             for (StockResponse stock : receivedData) {
-                stock.setSale(stock.getRating() >= 5 ? 1 : 0);
+                stock.setSell(stock.getRating() >= 5 ? 1 : 0);
             }
 
             HttpHeaders headers = new HttpHeaders();
