@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 public class SchedulerService {
 
-    @Value("${FetchTimes}")
+    @Value("${FetchTimes:0:00}")
     private String fetchTimes;
 
     private final BurzaService burzaService;
@@ -26,24 +26,24 @@ public class SchedulerService {
 
     @Scheduled(cron = "0 * * * * *") // každou minutu
     public void runFilterForFavoriteStocks() {
-        LocalTime now = LocalTime.now().withSecond(0).withNano(0);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
+        try {
+            LocalTime now = LocalTime.now().withSecond(0).withNano(0);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:mm");
+            List<String> times = Arrays.asList(fetchTimes.split(";"));
+            String nowFormatted = now.format(formatter);
 
-        List<String> times = Arrays.asList(fetchTimes.split(";"));
-        String nowFormatted = now.format(formatter);
+            if (times.contains(nowFormatted)) {
+                List<String> favoriteSymbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
 
-        if (times.contains(nowFormatted)) {
-            List<String> favoriteSymbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
+                for (String symbol : favoriteSymbols) {
+                    List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
+                    List<HistoricalData> filtered = burzaService.filterDataDown(data);
 
-            System.out.println("⏰ Čas " + nowFormatted + " => Spouštím pro oblíbené akcie: " + favoriteSymbols);
-
-            for (String symbol : favoriteSymbols) {
-                List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
-                List<HistoricalData> filtered = burzaService.filterDataDown(data);
-
-                System.out.println("📉 " + symbol + ": nalezeno " + filtered.size() + " poklesů");
-                // Zde můžeš uložit, zpracovat nebo poslat data dál
+                    System.out.println("Cron: " + symbol + " – výsledků: " + filtered.size());
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Cron job failed safely: " + e.getMessage());
         }
     }
 }

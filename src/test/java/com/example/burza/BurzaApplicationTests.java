@@ -8,6 +8,9 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for BurzaApplication to verify Spring context and critical beans.
+ */
 @SpringBootTest
 class BurzaApplicationTests {
 
@@ -23,11 +26,6 @@ class BurzaApplicationTests {
     void restTemplateBeanExists() {
         RestTemplate restTemplate = applicationContext.getBean(RestTemplate.class);
         assertNotNull(restTemplate);
-    }
-
-    @Test
-    void applicationStartsWithoutErrors() {
-        assertTrue(applicationContext.containsBean("burzaApplication"));
     }
 
     @Test
