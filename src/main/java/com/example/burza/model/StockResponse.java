@@ -9,5 +9,5 @@ public class StockResponse {
     private String name;
     private long date;
     private int rating;
-    private Integer sale;
+    private Integer sell;
 }
