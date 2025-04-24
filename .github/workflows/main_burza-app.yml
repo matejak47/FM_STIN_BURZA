@@ -1,0 +1,116 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy JAR app to Azure Web App - burza-app
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read # Required for actions/checkout
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 1️⃣ Build FRONTEND (React)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+          echo "Checking if dist directory exists..."
+          if (!(Test-Path "dist")) {
+            Write-Host "❌ Dist directory was not created!"
+            exit 1
+          }
+        shell: pwsh
+      
+      - name: Move frontend build to backend static folder
+        shell: pwsh
+        run: |
+          if (!(Test-Path "frontend/dist")) {
+            Write-Host "❌ frontend/dist does not exist! Build failed."
+            exit 1
+          }
+          if (!(Test-Path "src/main/resources/static")) {
+            New-Item -ItemType Directory -Path "src/main/resources/static"
+          }
+          Copy-Item -Path frontend/dist/* -Destination src/main/resources/static -Recurse -Force
+
+      # 2️⃣ Build BACKEND (Spring Boot)
+      - name: Set up Java version
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+
+      - name: Build backend with Maven
+        run: mvn clean install
+
+      - name: Run tests and generate JaCoCo coverage report
+        run: mvn test
+
+      - name: Upload JaCoCo coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/site/jacoco/jacoco.xml
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-app
+          path: 'target/*.jar'
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: java-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_78401AED261A4529AB72517C882B1E9B }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B32E250CBBBD44B19DF502724F7B7718 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD0EDCEA5F6B45A19E15501DF42F6207 }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'burza-app'
+          slot-name: 'Production'
+          package: '*.jar'
