@@ -122,7 +122,7 @@ class PortfolioControllerTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("AAPL"))
                 .andExpect(jsonPath("$[0].rating").value(-10))
-                .andExpect(jsonPath("$[0].sale").value(1));
+                .andExpect(jsonPath("$[0].sell").value(1));
     }
 
     @Test
@@ -142,7 +142,7 @@ class PortfolioControllerTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("TSLA"))
                 .andExpect(jsonPath("$[0].rating").value(10))
-                .andExpect(jsonPath("$[0].sale").value(0));
+                .andExpect(jsonPath("$[0].sell").value(0));
     }
 
 }

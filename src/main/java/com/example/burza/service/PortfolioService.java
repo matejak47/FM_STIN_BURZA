@@ -39,9 +39,9 @@ public class PortfolioService {
                 long timestamp = System.currentTimeMillis(); // Convert date to timestamp
 
                 int rating = 0;
-                int sale = 0;
+                int sell = 0;
 
-                responseList.add(new StockResponse(symbol, timestamp, rating, sale));
+                responseList.add(new StockResponse(symbol, timestamp, rating, sell));
             }
         } catch (Exception e) {
             System.err.println("Error fetching stock ratings: " + e.getMessage());
