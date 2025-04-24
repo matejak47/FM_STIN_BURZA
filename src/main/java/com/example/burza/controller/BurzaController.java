@@ -78,7 +78,7 @@ public class BurzaController {
         List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
         return burzaService.filterDataDown(data);
     }
-    @Value("${FetchTimes}")
+    @Value("${FetchTimes:0:00}")
     private String fetchTimes;
 
     @GetMapping("/fetchtime")
