@@ -3,6 +3,7 @@ package com.example.burza;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -10,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
  * Initializes Spring Boot application and configures necessary beans.
  */
 @SpringBootApplication
+@EnableScheduling
 public class BurzaApplication {
 
     /**

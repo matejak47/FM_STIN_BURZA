@@ -8,6 +8,8 @@ import com.example.burza.service.BurzaService;
 import com.example.burza.service.StockService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -37,6 +39,7 @@ public class BurzaController {
         this.symbolLoading = symbolLoading;
     }
 
+
     // --------------------------------------------------------------
 
     /**
@@ -63,6 +66,7 @@ public class BurzaController {
         return burzaService.fetchHistoricalData(symbol);
     }
 
+
     /**
      * Retrieves and filters historical data showing downward price movements.
      *
@@ -73,6 +77,13 @@ public class BurzaController {
     public List<HistoricalData> getFilteredHistoricalData(@RequestParam String symbol) {
         List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
         return burzaService.filterDataDown(data);
+    }
+    @Value("${FetchTimes}")
+    private String fetchTimes;
+
+    @GetMapping("/fetchtime")
+    public String getFetchTime() {
+        return "Nastavený FetchTimes: " + fetchTimes;
     }
 
     // GET /api/burza/daily?symbol=IBM
