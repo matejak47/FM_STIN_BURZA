@@ -30,7 +30,6 @@ jobs:
           cd frontend
           npm install
 
-      # 1️⃣ Build FRONTEND (Vite + React)
       - name: Build frontend
         run: |
           cd frontend
@@ -64,13 +63,26 @@ jobs:
       - name: Build backend with Maven
         run: mvn clean install
 
-      # 3️⃣ Upload backend artifact for deployment
+      - name: Run tests and generate JaCoCo coverage report
+        run: mvn test
+
+      - name: Upload JaCoCo coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/site/jacoco/jacoco.xml
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
           path: 'target/*.jar'
-
 
   deploy:
     runs-on: windows-latest
@@ -79,8 +91,8 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
