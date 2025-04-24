@@ -19,21 +19,17 @@ class BurzaApplicationTests {
 
     @Test
     void contextLoads() {
-        // Test to ensure the Spring application context loads successfully
-        assertNotNull(applicationContext, "Application context should not be null");
+        assertNotNull(applicationContext);
     }
 
     @Test
     void restTemplateBeanExists() {
-        // Test to ensure RestTemplate bean is available in the application context
         RestTemplate restTemplate = applicationContext.getBean(RestTemplate.class);
-        assertNotNull(restTemplate, "RestTemplate bean should exist");
+        assertNotNull(restTemplate);
     }
 
     @Test
     void mainMethodExecutesWithoutException() {
-        // Test to ensure that the application main method runs without throwing exceptions
-        assertDoesNotThrow(() -> BurzaApplication.main(new String[]{}),
-                "Application main method should execute without exceptions");
+        assertDoesNotThrow(() -> BurzaApplication.main(new String[]{}));
     }
 }
