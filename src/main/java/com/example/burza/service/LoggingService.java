@@ -12,7 +12,7 @@ public class LoggingService {
     private final List<String> logs = new LinkedList<>();
 
     public void log(String message) {
-        if (logs.size() > 500) { // třeba udržuj jen posledních 500 zpráv
+        if (logs.size() >= 500) { // třeba udržuj jen posledních 500 zpráv
             logs.remove(0);
         }
         logs.add(message);
