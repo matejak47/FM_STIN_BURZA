@@ -1,11 +1,6 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 
-function FavouritesTable({favourites, portfolio, onSelectFavourite, allStocks}) {
-    useEffect(() => {
-        console.log("Favourites:", favourites);
-        console.log("Portfolio:", portfolio);
-    }, [favourites, portfolio]);
-
+function FavouritesTable({favourites, portfolio, onSelectFavourite}) {
     if (!portfolio) {
         return <p>Loading portfolio...</p>;
     }

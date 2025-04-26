@@ -1,49 +1,53 @@
-import {useEffect, useState} from 'react'
+import {useEffect, useState} from 'react';
 
 function SearchBar({onSelectSymbol, onShowStock}) {
-    const [inputValue, setInputValue] = useState('')
-    const [allSymbols, setAllSymbols] = useState([]) // pole objektů { symbol, name }
-    const [filteredSymbols, setFilteredSymbols] = useState([])
+    const [inputValue, setInputValue] = useState('');
+    const [allSymbols, setAllSymbols] = useState([]);
+    const [filteredSymbols, setFilteredSymbols] = useState([]);
 
     useEffect(() => {
         const fetchSymbols = async () => {
             try {
-                const response = await fetch('/api/burza/all')
+                const response = await fetch('/api/burza/all');
                 if (!response.ok) {
-                    throw new Error('Chyba při načítání symbolů')
+                    throw new Error('Error loading symbols');
                 }
-                const data = await response.json()
-                console.log('Načtené data:', data) // Ověřte, že se vypisuje pole objektů
-                setAllSymbols(data)
+                const data = await response.json();
+                setAllSymbols(data || []);
             } catch (error) {
-                console.error(error)
+                console.error("Error fetching symbols:", error);
+                setAllSymbols([]);
             }
-        }
-        fetchSymbols()
-    }, [])
+        };
+        fetchSymbols();
+    }, []);
 
     const handleInputChange = (e) => {
-        const value = e.target.value
-        setInputValue(value)
+        const value = e.target.value;
+        setInputValue(value);
 
         if (value.length > 0) {
             const filtered = allSymbols.filter((item) =>
                 item.symbol.toLowerCase().includes(value.toLowerCase()) ||
                 item.name.toLowerCase().includes(value.toLowerCase())
-            )
-            console.log('Filtrované symboly pro "', value, '":', filtered)
-            setFilteredSymbols(filtered)
+            );
+            setFilteredSymbols(filtered);
         } else {
-            setFilteredSymbols([])
+            setFilteredSymbols([]);
         }
-    }
+    };
 
     const handleSelect = (symbol, name) => {
-        console.log('Vybrán symbol:', symbol, 'a název:', name)
-        setInputValue(symbol)
-        setFilteredSymbols([])
-        onSelectSymbol(symbol, name)
-    }
+        setInputValue(symbol);
+        setFilteredSymbols([]);
+        onSelectSymbol(symbol, name);
+        onShowStock(); // rovnou spustíme hledání po kliknutí na autocomplete
+    };
+
+    const handleSearchClick = () => {
+        setFilteredSymbols([]); // skryj autocomplete při ručním hledání
+        onShowStock();
+    };
 
     return (
         <div className="search-bar">
@@ -53,11 +57,10 @@ function SearchBar({onSelectSymbol, onShowStock}) {
                 onChange={handleInputChange}
                 placeholder="Search symbol..."
             />
-            <button onClick={onShowStock}>Search</button>
+            <button onClick={handleSearchClick}>Search</button>
 
             {filteredSymbols.length > 0 && (
                 <ul className="autocomplete-list">
-
                     {filteredSymbols.map((item) => (
                         <li
                             key={item.symbol}
@@ -69,7 +72,7 @@ function SearchBar({onSelectSymbol, onShowStock}) {
                 </ul>
             )}
         </div>
-    )
+    );
 }
 
-export default SearchBar
+export default SearchBar;

@@ -1,23 +1,29 @@
 import React, {useEffect, useState} from "react";
 import "./Portfolio.css";
 
-const Portfolio = ({setBalance}) => { // Přijímá setBalance z App.jsx
+const Portfolio = ({setBalance}) => {
     const [portfolio, setPortfolio] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const fetchPortfolio = async () => {
+        try {
+            const response = await fetch("/api/trade/portfolio");
+            if (!response.ok) throw new Error("Failed to fetch portfolio");
+
+            const data = await response.json();
+            setPortfolio(data);
+            setLoading(false);
+            setBalance(data.balance);
+        } catch (error) {
+            console.error("Error fetching portfolio:", error);
+            setError("Failed to load portfolio.");
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        fetch("/api/trade/portfolio")
-            .then(response => response.json())
-            .then(data => {
-                setPortfolio(data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error("Error fetching portfolio:", error);
-                setError("Failed to load portfolio.");
-                setLoading(false);
-            });
+        fetchPortfolio();
     }, []);
 
     const handleSellStock = async (symbol) => {
@@ -31,29 +37,14 @@ const Portfolio = ({setBalance}) => { // Přijímá setBalance z App.jsx
         try {
             const response = await fetch("/api/trade/execute", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    symbol,
-                    orderType: "SELL",
-                    quantity: quantityToSell
-                })
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({symbol, orderType: "SELL", quantity: quantityToSell})
             });
 
             const result = await response.json();
 
             if (result.success) {
-                setPortfolio(prev => ({
-                    ...prev,
-                    holdings: {
-                        ...prev.holdings,
-                        [symbol]: Math.max(0, prev.holdings[symbol] - quantityToSell)
-                    },
-                    balance: result.remainingBalance
-                }));
-
-                setBalance(result.remainingBalance); // ✅ Aktualizace celkové balance
+                await fetchPortfolio(); // ✅ Re-fetch portfolio po úspěšném prodeji
             } else {
                 alert(result.message);
             }
@@ -83,7 +74,7 @@ const Portfolio = ({setBalance}) => { // Přijímá setBalance z App.jsx
                     </thead>
                     <tbody>
                     {Object.entries(portfolio.holdings)
-                        .filter(([_, quantity]) => quantity > 0) // ✅ Odstranění akcií s hodnotou 0
+                        .filter(([_, quantity]) => quantity > 0)
                         .map(([symbol, quantity]) => (
                             <tr key={symbol}>
                                 <td>{symbol}</td>
