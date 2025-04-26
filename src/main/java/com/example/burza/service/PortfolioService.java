@@ -1,7 +1,10 @@
 package com.example.burza.service;
 
 import com.example.burza.model.*;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +30,8 @@ public class PortfolioService {
     private final StockService stockService;
     @Value("${NewsUrl:https://stin-zpravy-hjdkcwh3fefhe8gv.germanywestcentral-01.azurewebsites.net}")
     private String newsUrl;
+    @Value("${Tolerance:0.0}")
+    private double tolerance;
     private final RestTemplate restTemplate;
     boolean testMode = false;
 
@@ -42,7 +47,13 @@ public class PortfolioService {
         this.restTemplate = restTemplate;
     }
 
-    public int sendDataToGrancek() {
+    public void transaction() throws InterruptedException {
+        int id = sendDataToGrancek();
+        String receivedJson = receiveDataFromGrancek(id);
+        evaluateDataFromGrancek(receivedJson);
+    }
+
+    private int sendDataToGrancek() {
         String SendJson = parseFavoritesToJsonGrancek(portfolio.getFavoriteStocks());
 
         HttpHeaders headers = new HttpHeaders();
@@ -58,17 +69,19 @@ public class PortfolioService {
                 String.class
         );
 
+        assert response.getBody() != null;
         return extractRequestId(response.getBody());
     }
 
 
-    public String receiveDataFromGrancek(int request_id) throws InterruptedException {
+    private String receiveDataFromGrancek(int request_id) throws InterruptedException {
         String url = newsUrl + "/output/" + request_id + "/status";
         System.out.println(url);
         boolean running = true;
         while (running) {
             String ReceiveJson = restTemplate.getForObject(url, String.class);
             System.out.println(ReceiveJson);
+            assert ReceiveJson != null;
             if (extractStatus(ReceiveJson).equals("done")) {
                 System.out.println("Done");
                 running = false;
@@ -82,6 +95,24 @@ public class PortfolioService {
         String ReceiveJson = restTemplate.getForObject(newsUrl + "/output/" + request_id, String.class);
         System.out.println("ReceiveJson: " + ReceiveJson);
         return ReceiveJson;
+    }
+
+    private void evaluateDataFromGrancek(String receivedJson) {
+        String outputJson = convertJsonStringToStatusJson(receivedJson);
+        System.out.println("OutputJson: " + outputJson);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> request = new HttpEntity<>(outputJson, headers);
+        String url = newsUrl + "/UI";
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                request,
+                String.class
+        );
     }
 
     public void enableTestMode() {
@@ -230,7 +261,7 @@ public class PortfolioService {
         try {
             List<Map<String, String>> favoriteList = new ArrayList<>();
             LocalDate today = LocalDate.now();
-            LocalDate fiveDaysLater = today.plusDays(5);
+            LocalDate fiveDaysLater = today.minusDays(7);
 
             for (Symbol symbol : favourites.getSymbols()) {
                 Map<String, String> stockJson = new HashMap<>();
@@ -247,5 +278,33 @@ public class PortfolioService {
             return "[]";
         }
     }
+
+    private String convertJsonStringToStatusJson(String inputJson) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, Object>> companies = mapper.readValue(inputJson, new TypeReference<>() {});
+
+            ArrayNode outputArray = mapper.createArrayNode();
+
+            for (Map<String, Object> company : companies) {
+                String companyName = (String) company.get("company_name");
+                double rating = (Double) company.get("rating");
+
+                int status = rating > tolerance ? 1 : 0;
+
+                ObjectNode companyNode = mapper.createObjectNode();
+                companyNode.put("name", companyName);
+                companyNode.put("status", status);
+
+                outputArray.add(companyNode);
+            }
+
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(outputArray);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "[]";
+        }
+    }
+
 
 }

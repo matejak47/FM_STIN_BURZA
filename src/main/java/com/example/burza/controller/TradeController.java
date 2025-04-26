@@ -31,9 +31,10 @@ public class TradeController {
      * @return the result of the trade execution
      */
     @PostMapping("/execute")
-    public TradeResult executeOrder(@RequestBody TradeOrder order) {
+    public TradeResult executeOrder(@RequestBody TradeOrder order) throws InterruptedException {
         return portfolioService.executeTrade(order);
     }
+
 
     /**
      * Retrieves the current portfolio.
