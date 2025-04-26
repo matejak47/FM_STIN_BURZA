@@ -1,19 +1,15 @@
 package com.example.burza.controller;
 
-import com.example.burza.model.StockResponse;
 import com.example.burza.model.Symbol;
 import com.example.burza.service.PortfolioService;
 import com.example.burza.service.StockService;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/portfolio")
 public class PortfolioController {
-    private static final String EXTERNAL_API_URL = "https://6508cb37-03fb-4cac-bf4b-eacf87eebb00.mock.pstmn.io";
-    private final RestTemplate restTemplate = new RestTemplate();
     private final PortfolioService portfolioService;
     private final StockService stockService;
 
@@ -30,22 +26,6 @@ public class PortfolioController {
     @GetMapping("/favorites")
     public List<Symbol> getFavoriteStocks() {
         return portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
-    }
-
-    @GetMapping("/favorites/decline")
-    public List<StockResponse> getFavoriteStocksDecline(@RequestParam int days) {
-        List<String> symbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols()
-                .stream().map(Symbol::getSymbol).toList();
-        List<String> output = stockService.getSymbolsWithDecline(symbols, days);
-        return portfolioService.parseToJson(output);
-    }
-
-    @GetMapping("/favorites/increase")
-    public List<StockResponse> getFavoriteStocksIncrease(@RequestParam int days) {
-        List<String> symbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols()
-                .stream().map(Symbol::getSymbol).toList();
-        List<String> output = stockService.getSymbolsWithIncrease(symbols, days);
-        return portfolioService.parseToJson(output);
     }
 
     /**
@@ -69,4 +49,6 @@ public class PortfolioController {
     public boolean removeFavoriteStock(@PathVariable String symbol) {
         return portfolioService.getPortfolio().getFavoriteStocks().removeSymbol(symbol);
     }
+
+
 }

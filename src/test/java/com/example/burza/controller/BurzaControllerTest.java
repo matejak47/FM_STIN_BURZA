@@ -1,7 +1,6 @@
 package com.example.burza.controller;
 
 import com.example.burza.model.DailyData;
-import com.example.burza.model.HistoricalData;
 import com.example.burza.model.Symbol;
 import com.example.burza.model.SymbolLoading;
 import com.example.burza.service.BurzaService;
@@ -21,7 +20,6 @@ import java.util.List;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,7 +39,6 @@ class BurzaControllerTest {
     @InjectMocks
     private BurzaController burzaController;
 
-    private List<HistoricalData> historicalData;
     private List<DailyData> dailyData;
     private List<Symbol> symbols;
 
@@ -49,11 +46,6 @@ class BurzaControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(burzaController).build();
-
-        historicalData = Arrays.asList(
-                new HistoricalData("2024-01-01", 150.0, 145.0),
-                new HistoricalData("2024-01-02", 148.0, 140.0)
-        );
 
         dailyData = Arrays.asList(
                 new DailyData("2024-01-01", 150.0, 155.0, 149.0, 153.0, 50000),
@@ -67,48 +59,6 @@ class BurzaControllerTest {
     }
 
     @Test
-    void testFilterDataDown() throws Exception {
-        when(burzaService.filterDataDown(historicalData)).thenReturn(historicalData);
-
-        mockMvc.perform(post("/api/burza/filterdown")
-                        .contentType("application/json")
-                        .content("[{\"date\":\"2024-01-01\",\"openPrice\":150.0,\"closePrice\":145.0}]"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void testGetHistoricalData() throws Exception {
-        when(burzaService.fetchHistoricalData("IBM")).thenReturn(historicalData);
-
-        mockMvc.perform(get("/api/burza/historical?symbol=IBM"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].date").value("2024-01-01"))
-                .andExpect(jsonPath("$[0].openPrice").value(150.0))
-                .andExpect(jsonPath("$[0].closePrice").value(145.0));
-    }
-
-    @Test
-    void testGetFilteredHistoricalData() throws Exception {
-        when(burzaService.fetchHistoricalData("IBM")).thenReturn(historicalData);
-        when(burzaService.filterDataDown(historicalData)).thenReturn(historicalData);
-
-        mockMvc.perform(get("/api/burza/historical/filterDown?symbol=IBM"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-    }
-
-    @Test
-    void testGetFilteredUpData() throws Exception {
-        when(burzaService.fetchHistoricalData("IBM")).thenReturn(historicalData);
-        when(burzaService.filterDataUp(historicalData)).thenReturn(historicalData);
-
-        mockMvc.perform(get("/api/burza/historical/filterUp?symbol=IBM"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-    }
-
-    @Test
     void testGetDailyData() throws Exception {
         when(stockService.fetchDailyTimeSeries("IBM")).thenReturn(dailyData);
 
@@ -117,16 +67,6 @@ class BurzaControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].date").value("2024-01-01"))
                 .andExpect(jsonPath("$[0].close").value(153.0));
-    }
-
-    @Test
-    void testGetRecentData() throws Exception {
-        when(stockService.fetchDailyTimeSeries("IBM")).thenReturn(dailyData);
-        when(stockService.fetchDailyDataByTime(dailyData, "2024-01-02")).thenReturn(dailyData);
-
-        mockMvc.perform(get("/api/burza/daily/date?symbol=IBM&date=2024-01-02"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
     }
 
     @Test

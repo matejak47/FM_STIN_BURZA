@@ -75,72 +75,6 @@ public class StockService {
         return parseCsvToDailyData(csvData);
     }
 
-
-    /**
-     * Retrieves all stock symbols that have shown a price decline over the specified number of days.
-     *
-     * @param days    Number of days to check for price decline
-     * @param symbols Favourite symbols of the user
-     * @return List of symbols that have declined in price
-     */
-    public List<String> getSymbolsWithDecline(List<String> symbols, int days) {
-        List<String> decliningSymbols = new ArrayList<>();
-
-        for (String symbol : symbols) {
-            List<DailyData> data = fetchDailyTimeSeries(symbol);
-
-            if (hasDeclineInLastNDays(data, days)) {
-                decliningSymbols.add(symbol);
-            }
-        }
-
-        return decliningSymbols;
-    }
-
-    /**
-     * Retrieves all stock symbols that have shown a price increase over the specified number of days.
-     *
-     * @param days    Number of days to check for price increase
-     * @param symbols Favourite symbols of the user
-     * @return List of symbols that have increased in price
-     */
-    public List<String> getSymbolsWithIncrease(List<String> symbols, int days) {
-        List<String> increasingSymbols = new ArrayList<>();
-
-        for (String symbol : symbols) {
-            List<DailyData> data = fetchDailyTimeSeries(symbol);
-
-            if (hasIncreasedInLastNDays(data, days)) {
-                increasingSymbols.add(symbol);
-            }
-        }
-
-        return increasingSymbols;
-    }
-
-
-    /**
-     * Fetches daily data up to a specific start date.
-     *
-     * @param dailyDataList Complete list of daily data
-     * @param startDate     Date to start fetching data from
-     * @return List of daily data points up to the specified date
-     */
-    public List<DailyData> fetchDailyDataByTime(List<DailyData> dailyDataList, String startDate) {
-        int dateIndex = 0;
-        for (int i = 0; i <= dailyDataList.size(); i++) {
-            if (dailyDataList.get(i).getDate().equals(startDate)) {
-                dateIndex = i;
-                break;
-            }
-        }
-        List<DailyData> recentDataList = new ArrayList<>();
-        for (int i = 0; i < dateIndex; i++) {
-            recentDataList.add(dailyDataList.get(i));
-        }
-        return recentDataList;
-    }
-
     /**
      * Helper method for conversion from CSV to JSON
      *
@@ -183,34 +117,5 @@ public class StockService {
         dailyDataList.sort(Comparator.comparing(DailyData::getDate).reversed());
 
         return dailyDataList;
-    }
-
-    /**
-     * Checks if there has been a price decline over the specified number of days.
-     *
-     * @param data List of daily data to analyze
-     * @param days Number of days to check for decline
-     * @return True if there has been a price decline, false otherwise
-     */
-    private boolean hasDeclineInLastNDays(List<DailyData> data, int days) {
-        if (data == null || data.size() < days) {
-            return false;
-        }
-
-        DailyData firstDay = data.get(0);
-        DailyData lastDay = data.get(days - 1);
-
-        return lastDay.getClose() > firstDay.getClose();
-    }
-
-    private boolean hasIncreasedInLastNDays(List<DailyData> data, int days) {
-        if (data == null || data.size() < days) {
-            return false;
-        }
-
-        DailyData firstDay = data.get(0);
-        DailyData lastDay = data.get(days - 1);
-
-        return lastDay.getClose() < firstDay.getClose();
     }
 }
