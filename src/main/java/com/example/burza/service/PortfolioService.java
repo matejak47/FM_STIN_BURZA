@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 
 /**
@@ -35,7 +34,9 @@ public class PortfolioService {
     private double tolerance;
     private final RestTemplate restTemplate;
     boolean testMode = false;
-    Logger logger = Logger.getLogger(PortfolioService.class.getName());
+    @Autowired
+    private LoggingService loggingService;
+
 
     /**
      * Constructor initializing portfolio and stock service.
@@ -57,13 +58,15 @@ public class PortfolioService {
 
     private int sendDataToGrancek() {
         String SendJson = parseFavoritesToJsonGrancek(portfolio.getFavoriteStocks());
+        loggingService.log("Preparing to send JSON to Grancek: " + SendJson);
+
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<String> request = new HttpEntity<>(SendJson, headers);
         String url = newsUrl + "/submit";
-
+        loggingService.log("Sending POST request to URL: " + url);
         ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
@@ -72,20 +75,21 @@ public class PortfolioService {
         );
 
         assert response.getBody() != null;
+        loggingService.log("Received response body: " + response.getBody());
         return extractRequestId(response.getBody());
     }
 
 
     private String receiveDataFromGrancek(int request_id) throws InterruptedException {
         String url = newsUrl + "/output/" + request_id + "/status";
-        System.out.println(url);
+        loggingService.log(url);
         boolean running = true;
         while (running) {
             String ReceiveJson = restTemplate.getForObject(url, String.class);
-            System.out.println(ReceiveJson);
+            loggingService.log(ReceiveJson);
             assert ReceiveJson != null;
             if (extractStatus(ReceiveJson).equals("done")) {
-                System.out.println("Done");
+                loggingService.log("Done");
                 running = false;
                 continue;
             }
@@ -95,13 +99,13 @@ public class PortfolioService {
             }
         }
         String ReceiveJson = restTemplate.getForObject(newsUrl + "/output/" + request_id, String.class);
-        System.out.println("ReceiveJson: " + ReceiveJson);
+        loggingService.log("ReceiveJson: " + ReceiveJson);
         return ReceiveJson;
     }
 
     private void evaluateDataFromGrancek(String receivedJson) {
         String outputJson = convertJsonStringToStatusJson(receivedJson);
-        System.out.println("OutputJson: " + outputJson);
+        loggingService.log("OutputJson: " + outputJson);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -115,6 +119,7 @@ public class PortfolioService {
                 request,
                 String.class
         );
+        loggingService.log(request.getBody());
     }
 
     public void enableTestMode() {
@@ -216,9 +221,8 @@ public class PortfolioService {
         int keyIndex = 0;
         try {
             keyIndex = getKeyIndex(input, key);
-        }
-        catch (IllegalArgumentException e) {
-            logger.severe(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            loggingService.log(e.getMessage());
         }
 
         int colonIndex = input.indexOf(':', keyIndex);
@@ -240,7 +244,7 @@ public class PortfolioService {
         return Integer.parseInt(numberStr);
     }
 
-    private int keyIndex(String input, String key){
+    private int keyIndex(String input, String key) {
         return input.indexOf(key);
     }
 
@@ -257,9 +261,8 @@ public class PortfolioService {
         int keyIndex = 0;
         try {
             keyIndex = getKeyIndex(input, key);
-        }
-        catch (IllegalArgumentException e) {
-            logger.severe(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            loggingService.log(e.getMessage());
         }
 
         int colonIndex = input.indexOf(':', keyIndex);
@@ -294,7 +297,7 @@ public class PortfolioService {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.writeValueAsString(favoriteList);
         } catch (Exception e) {
-            logger.severe("Error converting favorites to JSON: " + e.getMessage());
+            loggingService.log("Error converting favorites to JSON: " + e.getMessage());
             return "[]";
         }
     }
@@ -302,7 +305,8 @@ public class PortfolioService {
     private String convertJsonStringToStatusJson(String inputJson) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            List<Map<String, Object>> companies = mapper.readValue(inputJson, new TypeReference<>() {});
+            List<Map<String, Object>> companies = mapper.readValue(inputJson, new TypeReference<>() {
+            });
 
             ArrayNode outputArray = mapper.createArrayNode();
 
@@ -321,7 +325,7 @@ public class PortfolioService {
 
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(outputArray);
         } catch (Exception e) {
-            logger.severe("Error converting JSON to status JSON: " + e.getMessage());
+            loggingService.log("Error converting JSON to status JSON: " + e.getMessage());
             return "[]";
         }
     }
