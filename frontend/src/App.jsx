@@ -4,6 +4,8 @@ import SearchBar from './components/SearchBar';
 import FavouritesTable from './components/FavouritesTable';
 import Portfolio from "./components/Portfolio.jsx";
 import FavouriteFilter from "./components/FavouriteFilter.jsx";
+import Log from './components/Log';
+
 
 function App() {
     const [selectedSymbol, setSelectedSymbol] = useState('');
@@ -246,6 +248,7 @@ function App() {
                         />
                     </aside>
                     <FavouriteFilter onSelectFavourite={handleShowStock} allStocks={allStocks}/>
+                    <Log/>
                 </>
             ) : (
                 <Portfolio setBalance={setBalance}/>
