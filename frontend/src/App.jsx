@@ -46,7 +46,7 @@ function App() {
             const lastEntry = data[data.length - 1];
             const stockDetails = {
                 symbol,
-                companyName: name || "Unknown Company",  // ✅ Tady zajistíme, že se používá správné jméno
+                companyName: name || "Unknown Company",
                 open: lastEntry.open,
                 close: lastEntry.close,
                 high: lastEntry.high,
@@ -55,7 +55,7 @@ function App() {
                 volume: lastEntry.volume
             };
 
-            console.log("Stock details being set:", stockDetails);  // ✅ Ověření, co se nastavuje
+            console.log("Stock details being set:", stockDetails);
             setSelectedStockData(stockDetails);
             setDailyData(data);
         } catch (error) {
@@ -64,8 +64,6 @@ function App() {
         }
     };
 
-
-    // Načtení portfolia a zůstatku z backendu
     const fetchPortfolio = async () => {
         try {
             const response = await fetch('/api/trade/portfolio');
@@ -78,7 +76,6 @@ function App() {
         }
     };
 
-    // Načtení oblíbených akcií
     const fetchFavourites = async () => {
         try {
             const response = await fetch('/api/portfolio/favorites');
@@ -90,14 +87,12 @@ function App() {
         }
     };
 
-    // Načtení historických dat pro vybranou akcii
     const fetchStockData = async (symbol, name) => {
         try {
             const response = await fetch(`/api/burza/daily?symbol=${symbol}`);
             if (!response.ok) throw new Error('Failed to fetch stock data');
             const data = await response.json();
 
-            // Opravené pořadí grafu (od nejstarších po nejnovější)
             const sortedData = data.sort((a, b) => new Date(a.date) - new Date(b.date));
             setDailyData(sortedData);
 
@@ -137,7 +132,7 @@ function App() {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    symbol: symbol, // ✅ Ujistíme se, že posíláme pouze symbol (např. "GOOGL")
+                    symbol: symbol,
                     orderType: "BUY",
                     quantity: quantity
                 }),
@@ -146,7 +141,7 @@ function App() {
             const result = await response.json();
             console.log("Trade result:", result);
             if (result.success) {
-                await fetchPortfolio(); // ✅ Aktualizace portfolia po nákupu
+                await fetchPortfolio();
             } else {
                 alert(result.message);
             }
