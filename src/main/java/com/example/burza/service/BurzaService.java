@@ -53,33 +53,7 @@ public class BurzaService {
 
         return parseCsvToHistoricalData(csvData);
     }
-
-    /**
-     * Filters data to show only downward price movements.
-     *
-     * @param data List of historical data to filter
-     * @return Filtered list showing only price decreases
-     */
-    public List<HistoricalData> filterDataDown(List<HistoricalData> data) {
-
-        return data.stream()
-                .filter(d -> d.getClosePrice() < d.getOpenPrice())
-                .toList();
-    }
-
-    /**
-     * Filters data to show only upward price movements.
-     *
-     * @param data List of historical data to filter
-     * @return Filtered list showing only price increases
-     */
-
-    public List<HistoricalData> filterDataUp(List<HistoricalData> data) {
-        return data.stream()
-                .filter(d -> d.getClosePrice() > d.getOpenPrice())
-                .toList();
-    }
-
+    
     private List<HistoricalData> parseCsvToHistoricalData(String csvData) {
         List<HistoricalData> historicalDataList = new ArrayList<>();
 
