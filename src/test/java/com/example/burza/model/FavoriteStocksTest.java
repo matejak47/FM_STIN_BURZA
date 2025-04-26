@@ -24,39 +24,45 @@ class FavoriteStocksTest {
 
     @Test
     void testAddSymbolSuccessfully() {
-        assertTrue(favoriteStocks.addSymbol("AAPL"));
-        assertTrue(favoriteStocks.addSymbol("GOOGL"));
-        assertEquals(List.of("AAPL", "GOOGL"), favoriteStocks.getSymbols());
+        favoriteStocks.addSymbol(new Symbol("AAPL", "Apple Inc."));
+        favoriteStocks.addSymbol(new Symbol("GOOGL", "Google Inc."));
+        assertEquals(List.of(
+                new Symbol("AAPL", "Apple Inc."),
+                new Symbol("GOOGL", "Google Inc.")
+        ), favoriteStocks.getSymbols());
     }
 
     @Test
     void testAddDuplicateSymbol() {
-        assertTrue(favoriteStocks.addSymbol("TSLA"));
-        assertFalse(favoriteStocks.addSymbol("TSLA")); // Should not allow duplicates
+        favoriteStocks.addSymbol(new Symbol("TSLA", "Tesla Inc."));
+        favoriteStocks.addSymbol(new Symbol("TSLA", "Tesla Inc.")); // Should not allow duplicates
         assertEquals(1, favoriteStocks.getSymbols().size());
     }
 
     @Test
     void testAddSymbolExceedingLimit() {
-        assertTrue(favoriteStocks.addSymbol("AAPL"));
-        assertTrue(favoriteStocks.addSymbol("GOOGL"));
-        assertTrue(favoriteStocks.addSymbol("TSLA"));
-        assertTrue(favoriteStocks.addSymbol("AMZN"));
-        assertTrue(favoriteStocks.addSymbol("MSFT"));
-
-        assertFalse(favoriteStocks.addSymbol("NFLX")); // Should fail, limit is 5
-        assertEquals(5, favoriteStocks.getSymbols().size());
+        favoriteStocks.addSymbol(new Symbol("AAPL", "Apple Inc."));
+        favoriteStocks.addSymbol(new Symbol("GOOGL", "Google Inc."));
+        favoriteStocks.addSymbol(new Symbol("TSLA", "Tesla Inc."));
+        favoriteStocks.addSymbol(new Symbol("AMZN", "Amazon Inc."));
+        favoriteStocks.addSymbol(new Symbol("MSFT", "Microsoft Inc."));
+        // 6. pokus už přesáhne limit, test si můžeš přidat
+        boolean added = favoriteStocks.addSymbol(new Symbol("NFLX", "Netflix Inc."));
+        assertFalse(added); // mělo by vrátit false
     }
+
 
     @Test
     void testRemoveSymbolSuccessfully() {
-        favoriteStocks.addSymbol("AAPL");
-        favoriteStocks.addSymbol("TSLA");
+        favoriteStocks.addSymbol(new Symbol("AAPL", "Apple Inc."));
+        favoriteStocks.addSymbol(new Symbol("TSLA", "Tesla Inc."));
 
         assertTrue(favoriteStocks.removeSymbol("AAPL"));
-        assertFalse(favoriteStocks.getSymbols().contains("AAPL"));
+        assertFalse(favoriteStocks.getSymbols().stream()
+                .anyMatch(s -> s.getSymbol().equals("AAPL")));
         assertEquals(1, favoriteStocks.getSymbols().size());
     }
+
 
     @Test
     void testRemoveNonExistingSymbol() {

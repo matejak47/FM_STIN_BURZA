@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 public class FavoriteStocks {
     private static final int MAX_FAVORITES = 5;
-    private List<String> symbols;
+    private List<Symbol> symbols;
 
     public FavoriteStocks() {
         this.symbols = new ArrayList<>();
@@ -24,11 +24,11 @@ public class FavoriteStocks {
      * @param symbol Stock symbol to add
      * @return true if added successfully, false if limit reached
      */
-    public boolean addSymbol(String symbol) {
+    public boolean addSymbol(Symbol symbol) {
         if (symbols.size() >= MAX_FAVORITES) {
             return false;
         }
-        if (!symbols.contains(symbol)) {
+        if (symbols.stream().noneMatch(s -> s.getSymbol().equals(symbol.getSymbol()))) {
             symbols.add(symbol);
             return true;
         }
@@ -42,7 +42,6 @@ public class FavoriteStocks {
      * @return true if removed, false if not found
      */
     public boolean removeSymbol(String symbol) {
-        return symbols.remove(symbol);
+        return symbols.removeIf(s -> s.getSymbol().equals(symbol));
     }
 }
-

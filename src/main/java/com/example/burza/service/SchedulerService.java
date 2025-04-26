@@ -1,6 +1,7 @@
 package com.example.burza.service;
 
 import com.example.burza.model.HistoricalData;
+import com.example.burza.model.Symbol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -33,9 +34,10 @@ public class SchedulerService {
             String nowFormatted = now.format(formatter);
 
             if (times.contains(nowFormatted)) {
-                List<String> favoriteSymbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
+                List<Symbol> favoriteSymbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
 
-                for (String symbol : favoriteSymbols) {
+                for (Symbol symbolObj : favoriteSymbols) {
+                    String symbol = symbolObj.getSymbol();
                     List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
                     List<HistoricalData> filtered = burzaService.filterDataDown(data);
 
@@ -46,4 +48,5 @@ public class SchedulerService {
             System.err.println("Cron job failed safely: " + e.getMessage());
         }
     }
+
 }
