@@ -88,76 +88,6 @@ public class PortfolioService {
         this.testMode = true;
     }
 
-    private static int extractRequestId(String input) {
-        String key = "\"request_id\"";
-        int keyIndex = input.indexOf(key);
-        if (keyIndex == -1) {
-            throw new IllegalArgumentException("Key not found");
-        }
-
-        int colonIndex = input.indexOf(':', keyIndex);
-        if (colonIndex == -1) {
-            throw new IllegalArgumentException("Colon not found after key");
-        }
-
-        int start = colonIndex + 1;
-        // Přeskočíme mezery
-        while (start < input.length() && !Character.isDigit(input.charAt(start))) {
-            start++;
-        }
-
-        int end = start;
-        while (end < input.length() && Character.isDigit(input.charAt(end))) {
-            end++;
-        }
-
-        String numberStr = input.substring(start, end);
-        return Integer.parseInt(numberStr);
-    }
-
-    public static String extractStatus(String input) {
-        String key = "\"status\"";
-        int keyIndex = input.indexOf(key);
-        if (keyIndex == -1) {
-            throw new IllegalArgumentException("Key not found");
-        }
-
-        int colonIndex = input.indexOf(':', keyIndex);
-        if (colonIndex == -1) {
-            throw new IllegalArgumentException("Colon not found after key");
-        }
-
-        int startQuote = input.indexOf('"', colonIndex + 1); // najdi první "
-        int endQuote = input.indexOf('"', startQuote + 1);   // najdi druhé "
-
-        if (startQuote == -1 || endQuote == -1) {
-            throw new IllegalArgumentException("Status value not properly quoted");
-        }
-
-        return input.substring(startQuote + 1, endQuote);
-    }
-
-    private String parseFavoritesToJsonGrancek(FavoriteStocks favourites) {
-        try {
-            List<Map<String, String>> favoriteList = new ArrayList<>();
-            LocalDate today = LocalDate.now();
-            LocalDate fiveDaysLater = today.plusDays(5);
-
-            for (Symbol symbol : favourites.getSymbols()) {
-                Map<String, String> stockJson = new HashMap<>();
-                stockJson.put("name", symbol.getName());
-                stockJson.put("from", today.toString()); // YYYY-MM-DD
-                stockJson.put("to", fiveDaysLater.toString()); // YYYY-MM-DD
-                favoriteList.add(stockJson);
-            }
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(favoriteList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "[]"; // pokud něco selže, vrať prázdné pole
-        }
-    }
 
     public List<StockResponse> parseToJson(List<String> symbols) {
         List<StockResponse> responseList = new ArrayList<>();
@@ -234,20 +164,88 @@ public class PortfolioService {
         if (newQuantity > 0) {
             portfolio.getHoldings().put(order.getSymbol(), newQuantity);
         } else {
-            portfolio.getHoldings().remove(order.getSymbol()); // ✅ Odstranění akcie s hodnotou 0
+            portfolio.getHoldings().remove(order.getSymbol());
         }
 
         portfolio.setBalance(portfolio.getBalance() + totalValue);
 
-        // ✅ Uložit změnu
         savePortfolioState();
 
         return new TradeResult(true, "Sale successful", currentPrice, totalValue, portfolio.getBalance());
     }
 
-    // ✅ Přidána metoda pro uložení změn v portfoliu
     private void savePortfolioState() {
         System.out.println("Saving portfolio: " + portfolio);
+    }
+
+    private static int extractRequestId(String input) {
+        String key = "\"request_id\"";
+        int keyIndex = input.indexOf(key);
+        if (keyIndex == -1) {
+            throw new IllegalArgumentException("Key not found");
+        }
+
+        int colonIndex = input.indexOf(':', keyIndex);
+        if (colonIndex == -1) {
+            throw new IllegalArgumentException("Colon not found after key");
+        }
+
+        int start = colonIndex + 1;
+        while (start < input.length() && !Character.isDigit(input.charAt(start))) {
+            start++;
+        }
+
+        int end = start;
+        while (end < input.length() && Character.isDigit(input.charAt(end))) {
+            end++;
+        }
+
+        String numberStr = input.substring(start, end);
+        return Integer.parseInt(numberStr);
+    }
+
+    private static String extractStatus(String input) {
+        String key = "\"status\"";
+        int keyIndex = input.indexOf(key);
+        if (keyIndex == -1) {
+            throw new IllegalArgumentException("Key not found");
+        }
+
+        int colonIndex = input.indexOf(':', keyIndex);
+        if (colonIndex == -1) {
+            throw new IllegalArgumentException("Colon not found after key");
+        }
+
+        int startQuote = input.indexOf('"', colonIndex + 1);
+        int endQuote = input.indexOf('"', startQuote + 1);
+
+        if (startQuote == -1 || endQuote == -1) {
+            throw new IllegalArgumentException("Status value not properly quoted");
+        }
+
+        return input.substring(startQuote + 1, endQuote);
+    }
+
+    private String parseFavoritesToJsonGrancek(FavoriteStocks favourites) {
+        try {
+            List<Map<String, String>> favoriteList = new ArrayList<>();
+            LocalDate today = LocalDate.now();
+            LocalDate fiveDaysLater = today.plusDays(5);
+
+            for (Symbol symbol : favourites.getSymbols()) {
+                Map<String, String> stockJson = new HashMap<>();
+                stockJson.put("name", symbol.getName());
+                stockJson.put("from", today.toString());
+                stockJson.put("to", fiveDaysLater.toString());
+                favoriteList.add(stockJson);
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(favoriteList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "[]";
+        }
     }
 
 }

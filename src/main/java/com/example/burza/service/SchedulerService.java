@@ -1,6 +1,5 @@
 package com.example.burza.service;
 
-import com.example.burza.model.HistoricalData;
 import com.example.burza.model.Symbol;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,17 +35,11 @@ public class SchedulerService {
             if (times.contains(nowFormatted)) {
                 List<Symbol> favoriteSymbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
 
-                for (Symbol symbolObj : favoriteSymbols) {
-                    String symbol = symbolObj.getSymbol();
-                    List<HistoricalData> data = burzaService.fetchHistoricalData(symbol);
-                    List<HistoricalData> filtered = burzaService.filterDataDown(data);
-
-                    System.out.println("Cron: " + symbol + " – výsledků: " + filtered.size());
-                }
+                // TODO: Zde implementovat akci, která se má provést v nastavených časech
+                System.out.println("Trigger action for favorite symbols at: " + nowFormatted);
             }
         } catch (Exception e) {
             System.err.println("Cron job failed safely: " + e.getMessage());
         }
     }
-
 }

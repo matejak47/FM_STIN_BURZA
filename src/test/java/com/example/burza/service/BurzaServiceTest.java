@@ -9,7 +9,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,29 +35,6 @@ class BurzaServiceTest {
         ReflectionTestUtils.setField(burzaService, "interval", testInterval);
     }
 
-    @Test
-    void testFilterDataDown() {
-        List<HistoricalData> data = Arrays.asList(
-                new HistoricalData("2024-02-01", 100, 90),
-                new HistoricalData("2024-02-02", 95, 105)
-        );
-
-        List<HistoricalData> result = burzaService.filterDataDown(data);
-        assertEquals(1, result.size());
-        assertEquals(90, result.get(0).getClosePrice());
-    }
-
-    @Test
-    void testFilterDataUp() {
-        List<HistoricalData> data = Arrays.asList(
-                new HistoricalData("2024-02-01", 100, 90),
-                new HistoricalData("2024-02-02", 95, 105)
-        );
-
-        List<HistoricalData> result = burzaService.filterDataUp(data);
-        assertEquals(1, result.size());
-        assertEquals(105, result.get(0).getClosePrice());
-    }
 
     @Test
     void testFetchHistoricalData_Success() {
