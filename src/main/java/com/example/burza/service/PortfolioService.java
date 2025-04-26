@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 
 /**
@@ -34,6 +35,7 @@ public class PortfolioService {
     private double tolerance;
     private final RestTemplate restTemplate;
     boolean testMode = false;
+    Logger logger = Logger.getLogger(PortfolioService.class.getName());
 
     /**
      * Constructor initializing portfolio and stock service.
@@ -107,7 +109,7 @@ public class PortfolioService {
         HttpEntity<String> request = new HttpEntity<>(outputJson, headers);
         String url = newsUrl + "/UI";
 
-        ResponseEntity<String> response = restTemplate.exchange(
+        restTemplate.exchange(
                 url,
                 HttpMethod.POST,
                 request,
@@ -209,11 +211,14 @@ public class PortfolioService {
         System.out.println("Saving portfolio: " + portfolio);
     }
 
-    private static int extractRequestId(String input) {
+    private int extractRequestId(String input) {
         String key = "\"request_id\"";
-        int keyIndex = input.indexOf(key);
-        if (keyIndex == -1) {
-            throw new IllegalArgumentException("Key not found");
+        int keyIndex = 0;
+        try {
+            keyIndex = getKeyIndex(input, key);
+        }
+        catch (IllegalArgumentException e) {
+            logger.severe(e.getMessage());
         }
 
         int colonIndex = input.indexOf(':', keyIndex);
@@ -235,11 +240,26 @@ public class PortfolioService {
         return Integer.parseInt(numberStr);
     }
 
-    private static String extractStatus(String input) {
-        String key = "\"status\"";
-        int keyIndex = input.indexOf(key);
+    private int keyIndex(String input, String key){
+        return input.indexOf(key);
+    }
+
+    private int getKeyIndex(String input, String key) {
+        int keyIndex = keyIndex(input, key);
         if (keyIndex == -1) {
             throw new IllegalArgumentException("Key not found");
+        }
+        return keyIndex;
+    }
+
+    private String extractStatus(String input) {
+        String key = "\"status\"";
+        int keyIndex = 0;
+        try {
+            keyIndex = getKeyIndex(input, key);
+        }
+        catch (IllegalArgumentException e) {
+            logger.severe(e.getMessage());
         }
 
         int colonIndex = input.indexOf(':', keyIndex);
@@ -274,7 +294,7 @@ public class PortfolioService {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.writeValueAsString(favoriteList);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.severe("Error converting favorites to JSON: " + e.getMessage());
             return "[]";
         }
     }
@@ -301,7 +321,7 @@ public class PortfolioService {
 
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(outputArray);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.severe("Error converting JSON to status JSON: " + e.getMessage());
             return "[]";
         }
     }
