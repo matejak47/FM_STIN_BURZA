@@ -1,14 +1,13 @@
-import React, {useState} from 'react';
+import React from 'react';
 import "./FavouriteFilter.css";
 
-function FavouriteFilter({onSelectFavourite, allStocks}) {
-    const [filteredFavourites, setFilteredFavourites] = useState([]);
-
+function FavouriteFilter({onSelectFavourite, filteredFavourites = []}) {
     return (
         <div className="favourite-filter favourites-section">
             <div className="filter-header">
                 <h2>Favourite Filter</h2>
             </div>
+
             {filteredFavourites.length > 0 && (
                 <table>
                     <thead>
@@ -24,12 +23,13 @@ function FavouriteFilter({onSelectFavourite, allStocks}) {
                         <tr key={stock.name}>
                             <td
                                 onClick={() => onSelectFavourite(stock.name, stock.name)}
-                                className="clickable">
+                                className="clickable"
+                            >
                                 {stock.name}
                             </td>
-                            <td>{new Date(stock.date).toLocaleDateString()}</td>
-                            <td>{stock.rating}</td>
-                            <td>{stock.sale !== null ? stock.sale : "N/A"}</td>
+                            <td>{stock.date ? new Date(stock.date).toLocaleDateString() : "N/A"}</td>
+                            <td>{stock.rating ?? "N/A"}</td>
+                            <td>{stock.sale !== null && stock.sale !== undefined ? stock.sale : "N/A"}</td>
                         </tr>
                     ))}
                     </tbody>

@@ -8,7 +8,6 @@ function StockDetail({stockData, dailyData, favourites, onToggleFavourite, onBuy
     const {symbol, companyName, open, close, high, low, date, volume} = stockData;
     const [quantity, setQuantity] = useState('');
 
-    // Výpočet rozdílu a procentní změny
     const differenceValue = close - open;
     const percentChange = ((differenceValue / open) * 100).toFixed(2);
     const arrowSymbol = differenceValue >= 0 ? '▲' : '▼';
