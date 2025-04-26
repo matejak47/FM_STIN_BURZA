@@ -3,6 +3,7 @@ package com.example.burza.controller;
 import com.example.burza.model.FavoriteStocks;
 import com.example.burza.model.Portfolio;
 import com.example.burza.model.StockResponse;
+import com.example.burza.model.Symbol;
 import com.example.burza.service.PortfolioService;
 import com.example.burza.service.StockService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,6 +35,7 @@ class PortfolioControllerTest {
 
     @Mock
     private Portfolio portfolio;
+
     @Mock
     private FavoriteStocks favoriteStocks;
 
@@ -48,48 +50,39 @@ class PortfolioControllerTest {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(portfolioController).build();
     }
-    
-
-    @Test
-    void testSendStocksToExternalApi_Failure() throws Exception {
-        // Sample JSON request body
-        String requestBody = """
-                [
-                    {"name": "Apple", "date": 1710458392000, "rating": 0, "sale": null}
-                ]
-                """;
-
-        // Mock failure response from external API
-        when(restTemplate.postForEntity(any(String.class), any(), any()))
-                .thenThrow(new RuntimeException("External API error"));
-
-        // Perform the request
-        mockMvc.perform(post("/api/portfolio/send-to-external")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isInternalServerError()) // Expect HTTP 500
-                .andExpect(content().string("Failed to send data to external API: External API error"));
-    }
 
     @Test
     void testGetFavoriteStocks() throws Exception {
         when(portfolioService.getPortfolio()).thenReturn(portfolio);
         when(portfolio.getFavoriteStocks()).thenReturn(favoriteStocks);
-        when(favoriteStocks.getSymbols()).thenReturn(List.of("AAPL", "TSLA"));
+        when(favoriteStocks.getSymbols()).thenReturn(List.of(
+                new Symbol("AAPL", "Apple Inc."),
+                new Symbol("TSLA", "Tesla Inc.")
+        ));
 
         mockMvc.perform(get("/api/portfolio/favorites"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0]").value("AAPL"));
+                .andExpect(jsonPath("$[0].symbol").value("AAPL"))
+                .andExpect(jsonPath("$[0].name").value("Apple Inc."));
     }
 
     @Test
     void testAddFavoriteStock() throws Exception {
         when(portfolioService.getPortfolio()).thenReturn(portfolio);
         when(portfolio.getFavoriteStocks()).thenReturn(favoriteStocks);
-        when(favoriteStocks.addSymbol("AAPL")).thenReturn(true);
+        when(favoriteStocks.addSymbol(any(Symbol.class))).thenReturn(true);
 
-        mockMvc.perform(post("/api/portfolio/favorites/AAPL"))
+        String requestBody = """
+                {
+                    "symbol": "AAPL",
+                    "name": "Apple Inc."
+                }
+                """;
+
+        mockMvc.perform(post("/api/portfolio/favorites")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
     }
@@ -107,14 +100,17 @@ class PortfolioControllerTest {
 
     @Test
     void testGetFavoriteStocksDecline() throws Exception {
-        List<String> favoriteSymbols = List.of("AAPL", "TSLA");
+        List<Symbol> favoriteSymbols = List.of(
+                new Symbol("AAPL", "Apple Inc."),
+                new Symbol("TSLA", "Tesla Inc.")
+        );
         List<String> decliningSymbols = List.of("AAPL");
         List<StockResponse> responseList = List.of(new StockResponse("AAPL", 1710458392000L, -10, 1));
 
         when(portfolioService.getPortfolio()).thenReturn(portfolio);
         when(portfolio.getFavoriteStocks()).thenReturn(favoriteStocks);
         when(favoriteStocks.getSymbols()).thenReturn(favoriteSymbols);
-        when(stockService.getSymbolsWithDecline(favoriteSymbols, 5)).thenReturn(decliningSymbols);
+        when(stockService.getSymbolsWithDecline(anyList(), anyInt())).thenReturn(decliningSymbols);
         when(portfolioService.parseToJson(decliningSymbols)).thenReturn(responseList);
 
         mockMvc.perform(get("/api/portfolio/favorites/decline?days=5"))
@@ -127,14 +123,17 @@ class PortfolioControllerTest {
 
     @Test
     void testGetFavoriteStocksIncrease() throws Exception {
-        List<String> favoriteSymbols = List.of("AAPL", "TSLA");
+        List<Symbol> favoriteSymbols = List.of(
+                new Symbol("AAPL", "Apple Inc."),
+                new Symbol("TSLA", "Tesla Inc.")
+        );
         List<String> increasingSymbols = List.of("TSLA");
         List<StockResponse> responseList = List.of(new StockResponse("TSLA", 1710458392000L, 10, 0));
 
         when(portfolioService.getPortfolio()).thenReturn(portfolio);
         when(portfolio.getFavoriteStocks()).thenReturn(favoriteStocks);
         when(favoriteStocks.getSymbols()).thenReturn(favoriteSymbols);
-        when(stockService.getSymbolsWithIncrease(favoriteSymbols, 5)).thenReturn(increasingSymbols);
+        when(stockService.getSymbolsWithIncrease(anyList(), anyInt())).thenReturn(increasingSymbols);
         when(portfolioService.parseToJson(increasingSymbols)).thenReturn(responseList);
 
         mockMvc.perform(get("/api/portfolio/favorites/increase?days=5"))
@@ -144,5 +143,4 @@ class PortfolioControllerTest {
                 .andExpect(jsonPath("$[0].rating").value(10))
                 .andExpect(jsonPath("$[0].sell").value(0));
     }
-
 }

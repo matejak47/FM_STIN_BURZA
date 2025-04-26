@@ -19,18 +19,19 @@ function FavouritesTable({favourites, portfolio, onSelectFavourite, allStocks}) 
                     <thead>
                     <tr>
                         <th>Symbol</th>
+                        <th>Company Name</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {favourites.map((symbol) => (
-                        <tr key={symbol}>
-                            <td onClick={() => {
-                                const stock = allStocks.find(s => s.symbol === symbol);
-                                const companyName = stock ? stock.name : symbol;
-                                onSelectFavourite(symbol, companyName);
-                            }}>
-                                {symbol}
+                    {favourites.map((fav) => (
+                        <tr key={fav.symbol}>
+                            <td
+                                onClick={() => onSelectFavourite(fav.symbol, fav.name)}
+                                className="clickable"
+                            >
+                                {fav.symbol}
                             </td>
+                            <td>{fav.name}</td>
                         </tr>
                     ))}
                     </tbody>

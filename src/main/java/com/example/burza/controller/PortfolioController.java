@@ -1,12 +1,9 @@
 package com.example.burza.controller;
 
 import com.example.burza.model.StockResponse;
+import com.example.burza.model.Symbol;
 import com.example.burza.service.PortfolioService;
 import com.example.burza.service.StockService;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,81 +25,48 @@ public class PortfolioController {
     /**
      * Retrieves list of favorite stocks.
      *
-     * @return List of favorite stock symbols
+     * @return List of favorite stock objects
      */
     @GetMapping("/favorites")
-    public List<String> getFavoriteStocks() {
+    public List<Symbol> getFavoriteStocks() {
         return portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
     }
 
-
     @GetMapping("/favorites/decline")
     public List<StockResponse> getFavoriteStocksDecline(@RequestParam int days) {
-        List<String> symbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
+        List<String> symbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols()
+                .stream().map(Symbol::getSymbol).toList();
         List<String> output = stockService.getSymbolsWithDecline(symbols, days);
         return portfolioService.parseToJson(output);
-
     }
 
     @GetMapping("/favorites/increase")
     public List<StockResponse> getFavoriteStocksIncrease(@RequestParam int days) {
-        List<String> symbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols();
+        List<String> symbols = portfolioService.getPortfolio().getFavoriteStocks().getSymbols()
+                .stream().map(Symbol::getSymbol).toList();
         List<String> output = stockService.getSymbolsWithIncrease(symbols, days);
         return portfolioService.parseToJson(output);
-    }
-
-    @PostMapping("/send-to-external")
-    public ResponseEntity<String> sendStocksToExternalApi(@RequestBody List<StockResponse> requestData) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<List<StockResponse>> requestEntity = new HttpEntity<>(requestData, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(EXTERNAL_API_URL, requestEntity, String.class);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Failed to send data to external API: External API error");
-        }
-    }
-
-    @PostMapping("/receive-from-external")
-    public ResponseEntity<String> receiveAndRespond(@RequestBody List<StockResponse> receivedData) {
-        try {
-            for (StockResponse stock : receivedData) {
-                stock.setSell(stock.getRating() >= 5 ? 1 : 0);
-            }
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<List<StockResponse>> requestEntity = new HttpEntity<>(receivedData, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(EXTERNAL_API_URL, requestEntity, String.class);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Failed to process received data: " + e.getMessage());
-        }
     }
 
     /**
      * Adds a stock to favorites.
      *
-     * @param symbol Stock symbol to add
+     * @param symbol Stock symbol object to add
      * @return true if added successfully, false if limit reached
      */
-    @PostMapping("/favorites/{symbol}")
-    public boolean addFavoriteStock(@PathVariable String symbol) {
+    @PostMapping("/favorites")
+    public boolean addFavoriteStock(@RequestBody Symbol symbol) {
         return portfolioService.getPortfolio().getFavoriteStocks().addSymbol(symbol);
     }
 
     /**
      * Removes a stock from favorites.
      *
-     * @param symbol Stock symbol to remove
+     * @param symbol Stock symbol string to remove
      * @return true if removed successfully
      */
     @DeleteMapping("/favorites/{symbol}")
     public boolean removeFavoriteStock(@PathVariable String symbol) {
         return portfolioService.getPortfolio().getFavoriteStocks().removeSymbol(symbol);
     }
-
 }
-

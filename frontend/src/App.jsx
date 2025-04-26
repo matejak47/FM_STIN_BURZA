@@ -176,17 +176,22 @@ function App() {
         }
     };
 
-    const handleToggleFavourite = async (symbol) => {
-        const isFavourite = favourites.includes(symbol);
+    const handleToggleFavourite = async (symbol, name) => {
+        const isFavourite = favourites.some(fav => fav.symbol === symbol);
+
         try {
-            const response = await fetch(`/api/portfolio/favorites/${symbol}`, {
-                method: isFavourite ? 'DELETE' : 'POST',
-                headers: {'Content-Type': 'application/json'}
-            });
-
-            if (!response.ok) throw new Error('Failed to update favourites');
-
-            // Po změně znovu načteme oblíbené akcie
+            if (isFavourite) {
+                await fetch(`/api/portfolio/favorites/${symbol}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'}
+                });
+            } else {
+                await fetch(`/api/portfolio/favorites`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({symbol, name})
+                });
+            }
             await fetchFavourites();
         } catch (error) {
             console.error('Error updating favourites:', error);
