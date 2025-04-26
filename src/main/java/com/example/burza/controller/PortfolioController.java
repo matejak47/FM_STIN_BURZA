@@ -5,7 +5,6 @@ import com.example.burza.model.Symbol;
 import com.example.burza.service.PortfolioService;
 import com.example.burza.service.StockService;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -13,7 +12,6 @@ import java.util.List;
 @RequestMapping("/api/portfolio")
 public class PortfolioController {
     private static final String EXTERNAL_API_URL = "https://6508cb37-03fb-4cac-bf4b-eacf87eebb00.mock.pstmn.io";
-    private final RestTemplate restTemplate = new RestTemplate();
     private final PortfolioService portfolioService;
     private final StockService stockService;
 
@@ -69,4 +67,6 @@ public class PortfolioController {
     public boolean removeFavoriteStock(@PathVariable String symbol) {
         return portfolioService.getPortfolio().getFavoriteStocks().removeSymbol(symbol);
     }
+
+
 }
