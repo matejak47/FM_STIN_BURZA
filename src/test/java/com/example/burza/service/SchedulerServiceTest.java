@@ -74,4 +74,12 @@ class SchedulerServiceTest {
         // PortfolioService by se NEMĚLO zavolat
         verify(portfolioService, never()).getPortfolio();
     }
+
+    @Test
+    void testRunFilterForFavoriteStocks_ExceptionHandling() {
+        when(portfolioService.getPortfolio()).thenThrow(new RuntimeException("Simulated error"));
+
+        schedulerService.runFilterForFavoriteStocks();
+    }
+
 }
