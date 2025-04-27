@@ -56,7 +56,7 @@ public class PortfolioService {
         evaluateDataFromGrancek(receivedJson);
     }
 
-    private int sendDataToGrancek() {
+    int sendDataToGrancek() {
         String SendJson = parseFavoritesToJsonGrancek(portfolio.getFavoriteStocks());
         loggingService.log("Preparing to send JSON to Grancek: " + SendJson);
 
@@ -246,8 +246,7 @@ public class PortfolioService {
             if (keyIndex == -1) {
                 throw new IllegalArgumentException("Key not found in input");
             }
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             loggingService.log(e.getMessage());
         }
         return keyIndex;

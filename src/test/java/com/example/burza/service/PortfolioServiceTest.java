@@ -1,15 +1,15 @@
 package com.example.burza.service;
 
-import com.example.burza.model.DailyData;
-import com.example.burza.model.StockResponse;
-import com.example.burza.model.TradeOrder;
-import com.example.burza.model.TradeResult;
+import com.example.burza.model.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +22,13 @@ class PortfolioServiceTest {
     @Mock
     private StockService stockService;
 
+    @Mock
+    private LoggingService loggingService;
+
+
     @InjectMocks
     private PortfolioService portfolioService;
+
 
     @BeforeEach
     void setUp() {
@@ -177,4 +182,93 @@ class PortfolioServiceTest {
         assertFalse(result.isSuccess());
         assertEquals("Invalid trade order type", result.getMessage());
     }
+
+    @Test
+    void testExtractRequestIdWithReflection() throws Exception {
+        Method method = PortfolioService.class.getDeclaredMethod("extractRequestId", String.class);
+        method.setAccessible(true);
+
+        int requestId = (int) method.invoke(portfolioService, "{\"request_id\":123}");
+
+        assertEquals(123, requestId);
+    }
+
+    @Test
+    void testExtractStatusWithReflection() throws Exception {
+        Method method = PortfolioService.class.getDeclaredMethod("extractStatus", String.class);
+        method.setAccessible(true);
+
+        String status = (String) method.invoke(portfolioService, "{\"status\":\"done\"}");
+
+        assertEquals("done", status);
+    }
+
+    @Test
+    void testParseFavoritesToJsonGrancekWithReflection() throws Exception {
+        Method method = PortfolioService.class.getDeclaredMethod("parseFavoritesToJsonGrancek", FavoriteStocks.class);
+        method.setAccessible(true);
+
+        FavoriteStocks favorites = new FavoriteStocks();
+        favorites.addSymbol(new Symbol("AAPL", "Apple"));
+
+        String json = (String) method.invoke(portfolioService, favorites);
+
+        assertTrue(json.contains("Apple"));
+        assertTrue(json.contains("from"));
+        assertTrue(json.contains("to"));
+    }
+
+    @Test
+    void testConvertJsonStringToStatusJsonWithReflection() throws Exception {
+        Method method = PortfolioService.class.getDeclaredMethod("convertJsonStringToStatusJson", String.class);
+        method.setAccessible(true);
+
+        String inputJson = "[{\"company_name\":\"Apple\",\"rating\":0.8}]";
+        String outputJson = (String) method.invoke(portfolioService, inputJson);
+
+        // místo contains -> načíst jako JSON a zkontrolovat
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(outputJson);
+
+        assertEquals(1, rootNode.size());
+        JsonNode appleNode = rootNode.get(0);
+
+        assertEquals("Apple", appleNode.get("name").asText());
+        assertEquals(1, appleNode.get("status").asInt());
+    }
+
+    @Test
+    void testParseToJson_Exception() {
+        when(stockService.fetchDailyTimeSeries(anyString())).thenThrow(new RuntimeException("Error"));
+        List<StockResponse> result = portfolioService.parseToJson(List.of("AAPL"));
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testParseFavoritesToJsonGrancek_Exception() throws Exception {
+        Method method = PortfolioService.class.getDeclaredMethod("parseFavoritesToJsonGrancek", FavoriteStocks.class);
+        method.setAccessible(true);
+
+        FavoriteStocks favorites = new FavoriteStocks() {
+            @Override
+            public List<Symbol> getSymbols() {
+                throw new RuntimeException("Fake error");
+            }
+        };
+
+        String result = (String) method.invoke(portfolioService, favorites);
+        assertEquals("[]", result);
+    }
+
+    @Test
+    void testConvertJsonStringToStatusJson_Exception() throws Exception {
+        Method method = PortfolioService.class.getDeclaredMethod("convertJsonStringToStatusJson", String.class);
+        method.setAccessible(true);
+
+        String invalidJson = "INVALID_JSON";
+        String result = (String) method.invoke(portfolioService, invalidJson);
+        assertEquals("[]", result);
+    }
+
+
 }
