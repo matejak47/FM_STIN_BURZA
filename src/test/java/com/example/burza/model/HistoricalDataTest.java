@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class HistoricalDataTest {
+public class HistoricalDataTest {
 
     @Test
     void testConstructorAndGetters() {
