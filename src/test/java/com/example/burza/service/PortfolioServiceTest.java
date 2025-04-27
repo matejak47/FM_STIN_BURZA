@@ -8,8 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +30,9 @@ class PortfolioServiceTest {
 
     @Mock
     private LoggingService loggingService;
+
+    @Mock
+    private RestTemplate restTemplate;
 
 
     @InjectMocks
@@ -205,18 +214,18 @@ class PortfolioServiceTest {
 
     @Test
     void testParseFavoritesToJsonGrancekWithReflection() throws Exception {
-        Method method = PortfolioService.class.getDeclaredMethod("parseFavoritesToJsonGrancek", FavoriteStocks.class);
+        Method method = PortfolioService.class.getDeclaredMethod("parseFavoritesToJsonGrancek", List.class);
         method.setAccessible(true);
 
-        FavoriteStocks favorites = new FavoriteStocks();
-        favorites.addSymbol(new Symbol("AAPL", "Apple"));
+        List<Symbol> symbols = List.of(new Symbol("AAPL", "Apple"));
 
-        String json = (String) method.invoke(portfolioService, favorites);
+        String json = (String) method.invoke(portfolioService, symbols);
 
         assertTrue(json.contains("Apple"));
         assertTrue(json.contains("from"));
         assertTrue(json.contains("to"));
     }
+
 
     @Test
     void testConvertJsonStringToStatusJsonWithReflection() throws Exception {
@@ -246,19 +255,20 @@ class PortfolioServiceTest {
 
     @Test
     void testParseFavoritesToJsonGrancek_Exception() throws Exception {
-        Method method = PortfolioService.class.getDeclaredMethod("parseFavoritesToJsonGrancek", FavoriteStocks.class);
+        Method method = PortfolioService.class.getDeclaredMethod("parseFavoritesToJsonGrancek", List.class);
         method.setAccessible(true);
 
-        FavoriteStocks favorites = new FavoriteStocks() {
+        List<Symbol> symbols = new ArrayList<>() {
             @Override
-            public List<Symbol> getSymbols() {
+            public Symbol get(int index) {
                 throw new RuntimeException("Fake error");
             }
         };
 
-        String result = (String) method.invoke(portfolioService, favorites);
+        String result = (String) method.invoke(portfolioService, symbols);
         assertEquals("[]", result);
     }
+
 
     @Test
     void testConvertJsonStringToStatusJson_Exception() throws Exception {
@@ -268,6 +278,20 @@ class PortfolioServiceTest {
         String invalidJson = "INVALID_JSON";
         String result = (String) method.invoke(portfolioService, invalidJson);
         assertEquals("[]", result);
+    }
+
+
+    @Test
+    void testEvaluateDataFromGrancek_Success() throws Exception {
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class)))
+                .thenReturn(new ResponseEntity<>(HttpStatus.OK));
+
+        // Zavoláme privátní metodu přes reflection
+        Method method = PortfolioService.class.getDeclaredMethod("evaluateDataFromGrancek", String.class);
+        method.setAccessible(true);
+
+        String inputJson = "[{\"company_name\":\"Apple\",\"rating\":0.8}]";
+        assertDoesNotThrow(() -> method.invoke(portfolioService, inputJson));
     }
 
 
