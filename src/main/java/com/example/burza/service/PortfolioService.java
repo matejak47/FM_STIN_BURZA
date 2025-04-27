@@ -56,7 +56,7 @@ public class PortfolioService {
         evaluateDataFromGrancek(receivedJson);
     }
 
-    int sendDataToGrancek() {
+    private int sendDataToGrancek() {
         String SendJson = parseFavoritesToJsonGrancek(portfolio.getFavoriteStocks());
         loggingService.log("Preparing to send JSON to Grancek: " + SendJson);
 
