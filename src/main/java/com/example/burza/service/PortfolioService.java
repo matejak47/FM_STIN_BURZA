@@ -34,8 +34,7 @@ public class PortfolioService {
     private double tolerance;
     private final RestTemplate restTemplate;
     boolean testMode = false;
-    @Autowired
-    private LoggingService loggingService;
+    private final LoggingService loggingService;
 
 
     /**
@@ -44,10 +43,11 @@ public class PortfolioService {
      * @param stockService service for fetching stock data
      */
     @Autowired
-    public PortfolioService(StockService stockService, RestTemplate restTemplate) {
+    public PortfolioService(StockService stockService, RestTemplate restTemplate, LoggingService loggingService) {
         this.stockService = stockService;
         this.portfolio = new Portfolio();
         this.restTemplate = restTemplate;
+        this.loggingService = loggingService;
     }
 
     public void transaction() throws InterruptedException {
@@ -218,12 +218,7 @@ public class PortfolioService {
 
     private int extractRequestId(String input) {
         String key = "\"request_id\"";
-        int keyIndex = 0;
-        try {
-            keyIndex = getKeyIndex(input, key);
-        } catch (IllegalArgumentException e) {
-            loggingService.log(e.getMessage());
-        }
+        int keyIndex = getKeyIndex(input, key);
 
         int colonIndex = input.indexOf(':', keyIndex);
         if (colonIndex == -1) {
@@ -244,26 +239,22 @@ public class PortfolioService {
         return Integer.parseInt(numberStr);
     }
 
-    private int keyIndex(String input, String key) {
-        return input.indexOf(key);
-    }
-
     private int getKeyIndex(String input, String key) {
-        int keyIndex = keyIndex(input, key);
-        if (keyIndex == -1) {
-            throw new IllegalArgumentException("Key not found");
+        int keyIndex = 0;
+        try {
+            keyIndex = input.indexOf(key);
+            if (keyIndex == -1) {
+                throw new IllegalArgumentException("Key not found in input");
+            }
+        } catch (IllegalArgumentException e) {
+            loggingService.log(e.getMessage());
         }
         return keyIndex;
     }
 
     private String extractStatus(String input) {
         String key = "\"status\"";
-        int keyIndex = 0;
-        try {
-            keyIndex = getKeyIndex(input, key);
-        } catch (IllegalArgumentException e) {
-            loggingService.log(e.getMessage());
-        }
+        int keyIndex = getKeyIndex(input, key);
 
         int colonIndex = input.indexOf(':', keyIndex);
         if (colonIndex == -1) {
