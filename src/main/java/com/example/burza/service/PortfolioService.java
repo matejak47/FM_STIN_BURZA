@@ -50,16 +50,19 @@ public class PortfolioService {
         this.loggingService = loggingService;
     }
 
-    public void transaction() throws InterruptedException {
-        int id = sendDataToGrancek();
+    public void transaction(List<Symbol> filteredSymbols) throws InterruptedException {
+        int id = sendDataToGrancek(filteredSymbols);
         String receivedJson = receiveDataFromGrancek(id);
         evaluateDataFromGrancek(receivedJson);
     }
 
-    private int sendDataToGrancek() {
-        String SendJson = parseFavoritesToJsonGrancek(portfolio.getFavoriteStocks());
-        loggingService.log("Preparing to send JSON to Grancek: " + SendJson);
+    private int sendDataToGrancek(List<Symbol> filteredSymbols) {
+        if (filteredSymbols == null || filteredSymbols.isEmpty()) {
+            throw new IllegalStateException("No filtered stocks available to send.");
+        }
 
+        String SendJson = parseFavoritesToJsonGrancek(filteredSymbols); // POZOR, tady změna - používáme vyfiltrované symboly!
+        loggingService.log("Preparing to send JSON to Grancek: " + SendJson);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -67,6 +70,7 @@ public class PortfolioService {
         HttpEntity<String> request = new HttpEntity<>(SendJson, headers);
         String url = newsUrl + "/submit";
         loggingService.log("Sending POST request to URL: " + url);
+
         ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
@@ -271,24 +275,24 @@ public class PortfolioService {
         return input.substring(startQuote + 1, endQuote);
     }
 
-    private String parseFavoritesToJsonGrancek(FavoriteStocks favourites) {
+    private String parseFavoritesToJsonGrancek(List<Symbol> symbols) {
         try {
             List<Map<String, String>> favoriteList = new ArrayList<>();
             LocalDate today = LocalDate.now();
             LocalDate fiveDaysLater = today.minusDays(7);
 
-            for (Symbol symbol : favourites.getSymbols()) {
+            for (Symbol symbol : symbols) {
                 Map<String, String> stockJson = new HashMap<>();
                 stockJson.put("name", symbol.getName());
-                stockJson.put("from", today.toString());
-                stockJson.put("to", fiveDaysLater.toString());
+                stockJson.put("from", fiveDaysLater.toString()); // Od 7 dní zpátky
+                stockJson.put("to", today.toString()); // Do dnes
                 favoriteList.add(stockJson);
             }
 
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.writeValueAsString(favoriteList);
         } catch (Exception e) {
-            loggingService.log("Error converting favorites to JSON: " + e.getMessage());
+            loggingService.log("Error converting filtered favorites to JSON: " + e.getMessage());
             return "[]";
         }
     }

@@ -1,5 +1,6 @@
 package com.example.burza.service;
 
+import com.example.burza.model.DaysDeclineFilter;
 import com.example.burza.model.FavoriteStocks;
 import com.example.burza.model.Portfolio;
 import com.example.burza.model.Symbol;
@@ -28,6 +29,12 @@ class SchedulerServiceTest {
     @Mock
     private FavoriteStocks favoriteStocks;
 
+    @Mock
+    private DaysDeclineFilter lastThreeDaysDeclineFilter;
+
+    @Mock
+    private LoggingService loggingService;
+
     @InjectMocks
     private SchedulerService schedulerService;
 
@@ -35,7 +42,7 @@ class SchedulerServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Přímé nastavení "fetchTimes" pomocí reflexe
+        // Přímé nastavení "fetchTimes" na aktuální čas (aby se spustil cron)
         try {
             var field = SchedulerService.class.getDeclaredField("fetchTimes");
             field.setAccessible(true);
@@ -50,28 +57,63 @@ class SchedulerServiceTest {
     }
 
     @Test
-    void testRunFilterForFavoriteStocks_whenTimeMatches() {
+    void testRunFilterForFavoriteStocks_whenTimeMatches_andSymbolsPassFilter() throws InterruptedException {
+        // Simuluj že filtr vrátí nějaké symboly
+        when(lastThreeDaysDeclineFilter.filter(anyList(), anyInt())).thenReturn(List.of(new Symbol("AAPL", "Apple")));
+
         schedulerService.runFilterForFavoriteStocks();
 
         verify(portfolioService, times(1)).getPortfolio();
         verify(portfolio, times(1)).getFavoriteStocks();
         verify(favoriteStocks, times(1)).getSymbols();
+        verify(lastThreeDaysDeclineFilter, times(1)).filter(anyList(), anyInt());
+        verify(portfolioService, times(1)).transaction(anyList());
+        verify(loggingService, atLeastOnce()).log(anyString());
     }
 
     @Test
-    void testRunFilterForFavoriteStocks_whenTimeDoesNotMatch() {
-        // Nastavíme fetchTimes na jiný čas
+    void testRunFilterForFavoriteStocks_whenTimeMatches_butNoSymbolsPassFilter() throws InterruptedException {
+        // Simuluj že filtr nic nevrátí
+        when(lastThreeDaysDeclineFilter.filter(anyList(), anyInt())).thenReturn(List.of());
+
+        schedulerService.runFilterForFavoriteStocks();
+
+        verify(portfolioService, times(1)).getPortfolio();
+        verify(portfolio, times(1)).getFavoriteStocks();
+        verify(favoriteStocks, times(1)).getSymbols();
+        verify(lastThreeDaysDeclineFilter, times(1)).filter(anyList(), anyInt());
+        verify(portfolioService, never()).transaction(anyList()); // Nemá se volat transaction
+        verify(loggingService, atLeastOnce()).log(contains("No symbols passed"));
+    }
+
+    @Test
+    void testRunFilterForFavoriteStocks_whenTimeDoesNotMatch() throws InterruptedException {
+        // Nastavíme fetchTimes na úplně jiný čas
         try {
             var field = SchedulerService.class.getDeclaredField("fetchTimes");
             field.setAccessible(true);
-            field.set(schedulerService, "00:00"); // Něco úplně jiného
+            field.set(schedulerService, "00:00");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         schedulerService.runFilterForFavoriteStocks();
 
-        // PortfolioService by se NEMĚLO zavolat
         verify(portfolioService, never()).getPortfolio();
+        verify(lastThreeDaysDeclineFilter, never()).filter(anyList(), anyInt());
+        verify(portfolioService, never()).transaction(anyList());
+    }
+
+    @Test
+    void testRunFilterForFavoriteStocks_ExceptionHandling() throws InterruptedException {
+        // Simulujeme výjimku při získávání portfolia
+        when(portfolioService.getPortfolio()).thenThrow(new RuntimeException("Simulated error"));
+
+        schedulerService.runFilterForFavoriteStocks();
+
+        // Ověříme že žádné další metody nebyly volané
+        verify(favoriteStocks, never()).getSymbols();
+        verify(lastThreeDaysDeclineFilter, never()).filter(anyList(), anyInt());
+        verify(portfolioService, never()).transaction(anyList());
     }
 }

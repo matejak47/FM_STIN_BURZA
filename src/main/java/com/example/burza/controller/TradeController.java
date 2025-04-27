@@ -31,8 +31,7 @@ public class TradeController {
      * @return the result of the trade execution
      */
     @PostMapping("/execute")
-    public TradeResult executeOrder(@RequestBody TradeOrder order) throws InterruptedException {
-        portfolioService.transaction();
+    public TradeResult executeOrder(@RequestBody TradeOrder order) {
         return portfolioService.executeTrade(order);
     }
 
