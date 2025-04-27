@@ -56,7 +56,7 @@ public class PortfolioService {
         evaluateDataFromGrancek(receivedJson);
     }
 
-    private int sendDataToGrancek(List<Symbol> filteredSymbols) {
+    int sendDataToGrancek(List<Symbol> filteredSymbols) {
         if (filteredSymbols == null || filteredSymbols.isEmpty()) {
             throw new IllegalStateException("No filtered stocks available to send.");
         }
@@ -84,7 +84,7 @@ public class PortfolioService {
     }
 
 
-    private String receiveDataFromGrancek(int request_id) throws InterruptedException {
+    String receiveDataFromGrancek(int request_id) throws InterruptedException {
         String url = newsUrl + "/output/" + request_id + "/status";
         loggingService.log(url);
         boolean running = true;

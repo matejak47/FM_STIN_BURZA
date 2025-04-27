@@ -185,4 +185,21 @@ class StockServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    void testParseCsvToDailyData_ArrayIndexOutOfBounds() {
+        String csvWithTooFewColumns = """
+                Date,Open,High,Low,Close,Volume
+                2024-02-01,100,110
+                """; // jen 3 hodnoty místo 6!
+
+        when(restTemplate.getForObject(anyString(), eq(String.class)))
+                .thenReturn(csvWithTooFewColumns);
+
+        List<DailyData> result = stockService.fetchDailyTimeSeries("AAPL");
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty()); // chyba zachycena catch blokem
+    }
+
+
 }
