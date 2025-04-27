@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/rating")
+@RequestMapping("/api/rating")
 public class RatingController {
     private final PortfolioService portfolioService;
 
@@ -19,3 +19,4 @@ public class RatingController {
         portfolioService.transaction();
     }
 }
+

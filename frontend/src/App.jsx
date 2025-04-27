@@ -196,7 +196,18 @@ function App() {
         }
     };
     const handleTransactionClick = async () => {
-        // TODO: Zde implementovat akci
+        try {
+            const response = await fetch('/api/rating', {
+                method: 'POST'
+            });
+            if (!response.ok) {
+                throw new Error('Failed to trigger transaction');
+            }
+            alert('Transaction triggered successfully!');
+        } catch (error) {
+            console.error('Error triggering transaction:', error);
+            alert('Failed to trigger transaction.');
+        }
     };
 
 
