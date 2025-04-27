@@ -18,6 +18,7 @@ function App() {
     const [portfolio, setPortfolio] = useState({holdings: {}});
     const [view, setView] = useState('home');
     const [allStocks, setAllStocks] = useState([]);
+    const [filteredFavourites, setFilteredFavourites] = useState([]);
 
     useEffect(() => {
         fetch("/api/burza/all")
@@ -203,6 +204,8 @@ function App() {
             if (!response.ok) {
                 throw new Error('Failed to trigger transaction');
             }
+            const data = await response.json();
+            setFilteredFavourites(data);
             alert('Transaction triggered successfully!');
         } catch (error) {
             console.error('Error triggering transaction:', error);
@@ -266,7 +269,8 @@ function App() {
                             allStocks={allStocks}
                         />
                     </aside>
-                    <FavouriteFilter onSelectFavourite={handleShowStock} allStocks={allStocks}/>
+                    <FavouriteFilter onSelectFavourite={handleShowStock} filteredFavourites={filteredFavourites}
+                                     allStocks={allStocks}/>
                     <Log/>
                 </>
             ) : (

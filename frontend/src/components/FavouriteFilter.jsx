@@ -1,39 +1,14 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import "./FavouriteFilter.css";
 
-function FavouriteFilter({onSelectFavourite}) {
-    const [filteredFavourites, setFilteredFavourites] = useState([]);
-
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchFilteredFavourites() {
-            try {
-                const response = await fetch("/api/rating", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"}
-                });
-                const data = await response.json();
-                setFilteredFavourites(data);
-            } catch (error) {
-                console.error("Chyba při načítání filtrovaných akcií:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        fetchFilteredFavourites();
-    }, []);
-
+function FavouriteFilter({onSelectFavourite, filteredFavourites = []}) {
     return (
         <div className="favourite-filter favourites-section">
             <div className="filter-header">
                 <h2>Favourite Filter</h2>
             </div>
 
-            {isLoading ? (
-                <p>Načítání dat...</p>
-            ) : filteredFavourites.length > 0 ? (
+            {filteredFavourites.length > 0 ? (
                 <table>
                     <thead>
                     <tr>
