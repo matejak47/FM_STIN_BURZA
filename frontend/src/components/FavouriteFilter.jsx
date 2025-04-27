@@ -4,15 +4,21 @@ import "./FavouriteFilter.css";
 function FavouriteFilter({onSelectFavourite}) {
     const [filteredFavourites, setFilteredFavourites] = useState([]);
 
+    const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
-        // Zavoláme API hned při načtení komponenty
         async function fetchFilteredFavourites() {
             try {
-                const response = await fetch("/api/rating");
+                const response = await fetch("/api/rating", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"}
+                });
                 const data = await response.json();
-                setFilteredFavourites(data); // uložíme do stavu
+                setFilteredFavourites(data);
             } catch (error) {
                 console.error("Chyba při načítání filtrovaných akcií:", error);
+            } finally {
+                setIsLoading(false);
             }
         }
 
@@ -25,13 +31,14 @@ function FavouriteFilter({onSelectFavourite}) {
                 <h2>Favourite Filter</h2>
             </div>
 
-            {filteredFavourites.length > 0 ? (
+            {isLoading ? (
+                <p>Načítání dat...</p>
+            ) : filteredFavourites.length > 0 ? (
                 <table>
                     <thead>
                     <tr>
                         <th>Company</th>
                         <th>Symbol</th>
-                        {/* pokud chceš, můžeme tady později přidat Date, Rating, Sale */}
                     </tr>
                     </thead>
                     <tbody>
@@ -49,7 +56,7 @@ function FavouriteFilter({onSelectFavourite}) {
                     </tbody>
                 </table>
             ) : (
-                <p>Žádné akcie neprošly filtrem.</p> // fallback pokud prázdné
+                <p>Žádné akcie neprošly filtrem.</p>
             )}
         </div>
     );
