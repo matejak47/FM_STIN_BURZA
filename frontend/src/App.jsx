@@ -5,6 +5,7 @@ import FavouritesTable from './components/FavouritesTable';
 import Portfolio from "./components/Portfolio.jsx";
 import FavouriteFilter from "./components/FavouriteFilter.jsx";
 import Log from './components/Log';
+import './App.css'
 
 
 function App() {
@@ -194,6 +195,9 @@ function App() {
             console.error('Error updating favourites:', error);
         }
     };
+    const handleTransactionClick = async () => {
+        // TODO: Zde implementovat akci
+    };
 
 
     return (
@@ -238,7 +242,11 @@ function App() {
                     </main>
 
                     <aside className="favourites-section">
-                        <h2>Favourites</h2>
+                        <div className="tlacitko">
+                            <h2>Favourites</h2>
+                            <button onClick={handleTransactionClick}>Trigger Transaction</button>
+                        </div>
+
                         <FavouritesTable
                             favourites={favourites}
                             onToggleFavourite={handleToggleFavourite}

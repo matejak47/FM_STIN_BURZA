@@ -57,9 +57,12 @@ public class PortfolioService {
     }
 
     private int sendDataToGrancek() {
+        if (portfolio.getFavoriteStocks() == null || portfolio.getFavoriteStocks().getSymbols().isEmpty()) {
+            throw new IllegalStateException("No favorite stocks available to send.");
+        }
+
         String SendJson = parseFavoritesToJsonGrancek(portfolio.getFavoriteStocks());
         loggingService.log("Preparing to send JSON to Grancek: " + SendJson);
-
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -67,6 +70,7 @@ public class PortfolioService {
         HttpEntity<String> request = new HttpEntity<>(SendJson, headers);
         String url = newsUrl + "/submit";
         loggingService.log("Sending POST request to URL: " + url);
+
         ResponseEntity<String> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
